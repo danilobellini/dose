@@ -24,7 +24,7 @@ danilo [dot] bellini [at] gmail [dot] com
 from distutils.core import setup
 
 # Long description is all from README.txt, but the ending copyright message
-with open("README.txt", "r") as f:
+with open("README.rst", "r") as f:
   long_description = f.read()
 long_description = long_description.rsplit("Copyright", 1)[0].strip()
 
