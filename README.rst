@@ -1,8 +1,11 @@
-**Dose** is an automated semaphore GUI showing the state in
+Dose !!!
+========
+
+An automated semaphore GUI showing the state in
 *test driven development*, mainly written for dojos.
 
 Directory and watching
-~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""
 
 **Dose** watches one directory for any kind of change
 new file, file modified, file removed, subdirectory renamed,
@@ -11,7 +14,7 @@ watchdog package. Changes on files ending on *".pyc"* and
 *".pyo"* are neglect.
 
 What happens when something changes?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""""""""""""""
 
 A *customized* subprocess is called, all its output/error
 data is left on the shell used to call Dose, and its return
@@ -20,7 +23,7 @@ green, else it it turns red. It stays yellow while waiting
 the subprocess to finish.
 
 Is it easy to use or should I spend hours to set it up?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 The default directory path to watch is the one used to call
 Dose. There's no default calling string, but 'nosetests'
@@ -30,7 +33,7 @@ and double click on it, there's no need to lose time with
 settings.
 
 And the GUI?
-~~~~~~~~~~~~
+""""""""""""
 
 The GUI toolkit used in this project is wxPython. You can
 move the semaphore by dragging it around. Doing so with
@@ -39,8 +42,10 @@ transparency (not available on Linux, for now). The
 semaphore window always stays on top. A right click would
 show all options available.
 
---
+----
 
 Copyright (C) 2012 Danilo de Jesus da Silva Bellini
-danilo [dot] bellini [at] gmail [dot] com
+- danilo [dot] bellini [at] gmail [dot] com
+
 License is GPLv3. See COPYING.txt for more details.
+
