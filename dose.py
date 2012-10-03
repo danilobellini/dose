@@ -29,6 +29,7 @@ from subprocess import Popen, PIPE
 from datetime import datetime
 import os
 import time
+from fnmatch import fnmatch
 
 # Metadata (see setup.py for more information about these)
 __version__ = "2012.10.03dev"
@@ -66,6 +67,7 @@ LEDS_GREEN = (LED_OFF, LED_OFF, LED_GREEN)
 BACKGROUND_COLOR = 0x000000
 BACKGROUND_BORDER_COLOR = 0x7f7f7f7f
 TERMINAL_WIDTH = 79
+FILENAME_PATTERN_TO_IGNORE = "*.pyc, *.pyo"
 
 def rounded_rectangle_region(width, height, radius):
   """
@@ -381,10 +383,10 @@ class DoseWatcher(object):
         if evt is None: # First event, called directly
           self.last_mtime = time.time() # Last change happened now
         else:
-          # Neglect calls from compiled files
+          # Neglect calls from compiled or otherwise ignorable files
           path = evt.src_path
-          for extension in ".pyc; .pyo".split(";"):
-            if path.endswith(extension.strip()):
+          for pattern in FILENAME_PATTERN_TO_IGNORE.split(";"):
+            if fnmatch(path, pattern.strip()):
               return
 
           # Neglect calls that happens too fast by waiting few hundreds of
