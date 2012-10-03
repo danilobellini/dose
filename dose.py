@@ -67,7 +67,7 @@ LEDS_GREEN = (LED_OFF, LED_OFF, LED_GREEN)
 BACKGROUND_COLOR = 0x000000
 BACKGROUND_BORDER_COLOR = 0x7f7f7f7f
 TERMINAL_WIDTH = 79
-FILENAME_PATTERN_TO_IGNORE = "*.pyc, *.pyo"
+FILENAME_PATTERN_TO_IGNORE = "*.pyc; *.pyo; .git/*"
 TIME_BEFORE_CALL = .5 # seconds between event and the call action
 
 def rounded_rectangle_region(width, height, radius):
@@ -385,7 +385,7 @@ class DoseWatcher(object):
         if evt is not None: # If not the first event
 
           # Neglect calls from compiled or otherwise ignorable files
-          path = evt.src_path
+          path = os.path.relpath(evt.src_path, self.directory)
           for pattern in FILENAME_PATTERN_TO_IGNORE.split(";"):
             if fnmatch(path, pattern.strip()):
               return
