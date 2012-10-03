@@ -1,5 +1,6 @@
 Development...
 - A better setup script for pip and easy_install with dependency check
+- Bounce effect (multi-calls for one change) no more
 
 2012.10.02
 - First (alpha) version!

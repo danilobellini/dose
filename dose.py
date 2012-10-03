@@ -68,6 +68,7 @@ BACKGROUND_COLOR = 0x000000
 BACKGROUND_BORDER_COLOR = 0x7f7f7f7f
 TERMINAL_WIDTH = 79
 FILENAME_PATTERN_TO_IGNORE = "*.pyc, *.pyo"
+TIME_BEFORE_CALL = .5 # seconds between event and the call action
 
 def rounded_rectangle_region(width, height, radius):
   """
@@ -380,26 +381,21 @@ class DoseWatcher(object):
         # ---------------------------------------
         # Event filters (to avoid unuseful calls)
         # ---------------------------------------
-        if evt is None: # First event, called directly
-          self.last_mtime = time.time() # Last change happened now
-        else:
+        event_time = time.time()
+        if evt is not None: # If not the first event
+
           # Neglect calls from compiled or otherwise ignorable files
           path = evt.src_path
           for pattern in FILENAME_PATTERN_TO_IGNORE.split(";"):
             if fnmatch(path, pattern.strip()):
               return
 
-          # Neglect calls that happens too fast by waiting few hundreds of
-          # milliseconds, and "calls from the past"
-          time.sleep(.2)
-          try:
-            new_mtime = os.path.getmtime(path)
-            if new_mtime <= self.last_mtime:
-              return
-            self.last_mtime = new_mtime
-          except OSError:
-            pass # File deleted, probably. We don't have the time to update,
-                 # so let's run the calling string
+          # Neglect calls that happens too fast (bounce) with a time lag
+          time.sleep(TIME_BEFORE_CALL)
+          if event_time < self.last_etime:
+            return
+
+        self.last_etime = event_time
 
         # ------------------
         # Subprocess calling
