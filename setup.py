@@ -21,12 +21,14 @@ Created on Sat Sep 29 2012
 danilo [dot] bellini [at] gmail [dot] com
 """
 
-from distutils.core import setup
+from setuptools import setup
+
+__version__ = "2012.10.03dev"
 
 # Long description is all from README.txt, but the ending copyright message
 with open("README.rst", "r") as f:
   long_description = f.read()
-long_description = long_description.rsplit("Copyright", 1)[0].strip()
+long_description = long_description.rsplit("----", 1)[0].strip()
 
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -43,7 +45,7 @@ classifiers = [
 ]
 
 setup(name="dose",
-      version="2012.10.02",
+      version=__version__,
       author="Danilo de Jesus da Silva Bellini",
       author_email="danilo.bellini@gmail.com",
       url='http://github.com/danilobellini/dose',
@@ -52,4 +54,5 @@ setup(name="dose",
       license="GPLv3",
       scripts=["dose.py"],
       classifiers=classifiers,
+      install_requires=["watchdog"]
      )
