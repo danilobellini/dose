@@ -1,0 +1,11 @@
+Development...
+- A better setup script for pip and easy_install with dependency check
+
+2012.10.02
+- First (alpha) version!
+- Semaphore borderless GUI with wxPython for Linux and Windows
+- Watches one directory for changes with watchdog (avoids polling!)
+- Customized call string
+- Always on top
+- Transparent window (all operating systems), customizable (Windows-only)
+- Fully resizable window

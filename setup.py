@@ -22,11 +22,21 @@ danilo [dot] bellini [at] gmail [dot] com
 """
 
 from setuptools import setup
+import os
 
-__version__ = "2012.10.03dev"
+path = os.path.split(__file__)[0]
+script_file = "dose.py"
+
+# Get metadata from the script file without actually importing it
+metadata = {}
+with open(os.path.join(path, script_file), "r") as f:
+  for line in f:
+    if line.startswith("__"):
+      assignment = [side.strip() for side in line.split("=")]
+      metadata[assignment[0].strip("_")] = eval(assignment[1])
 
 # Long description is all from README.txt, but the ending copyright message
-with open("README.rst", "r") as f:
+with open(os.path.join(path, "README.rst"), "r") as f:
   long_description = f.read()
 long_description = long_description.rsplit("----", 1)[0].strip()
 
@@ -35,7 +45,8 @@ classifiers = [
   "Environment :: Win32 (MS Windows)",
   "Environment :: X11 Applications :: GTK",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "License :: OSI Approved :: "
+    "GNU General Public License v3 or later (GPLv3+)",
   "Natural Language :: English",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
@@ -45,14 +56,12 @@ classifiers = [
 ]
 
 setup(name="dose",
-      version=__version__,
-      author="Danilo de Jesus da Silva Bellini",
-      author_email="danilo.bellini@gmail.com",
-      url='http://github.com/danilobellini/dose',
       description="Automated semaphore GUI showing the state in TDD",
       long_description=long_description,
       license="GPLv3",
-      scripts=["dose.py"],
+      scripts=[script_file],
       classifiers=classifiers,
-      install_requires=["watchdog"]
+      install_requires=["watchdog>=0.6.0",
+                        "wxPython"],
+      **metadata
      )

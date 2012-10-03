@@ -30,7 +30,11 @@ from datetime import datetime
 import os
 import time
 
+# Metadata (see setup.py for more information about these)
 __version__ = "2012.10.03dev"
+__author__ = "Danilo de Jesus da Silva Bellini"
+__author_email__  = "danilo [dot] bellini [at] gmail [dot] com"
+__url__ = "http://github.com/danilobellini/dose"
 
 # TODO:
 # - Find a way to get transparency work with wxGTK. However, it seems that
@@ -533,11 +537,11 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
     evt.Skip()
 
   def on_help_and_about(self, evt):
-    author = "Danilo de Jesus da Silva Bellini"
-    email = "danilo [dot] bellini [at] gmail [dot] com"
     abinfo = wx.AboutDialogInfo()
-    abinfo.Artists = abinfo.Developers = [" ".join([author, "-", email])]
-    abinfo.Copyright = "Copyright (C) 2012 " + author
+    abinfo.Artists = abinfo.Developers = [" ".join([__author__, "-",
+                                                    __author_email__])
+                                         ]
+    abinfo.Copyright = "Copyright (C) 2012 " + __author__
     abinfo.Description = (
       "Automated semaphore GUI showing the state in test driven development."
       "\n\n"
@@ -583,6 +587,7 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
       "You should have received a copy of the GNU General Public License\n"
       "along with this program. If not, see <http://www.gnu.org/licenses/>."
     )
+    abinfo.WebSite = __url__
     wx.AboutBox(abinfo)
 
 
