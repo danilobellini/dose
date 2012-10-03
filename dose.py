@@ -30,6 +30,8 @@ from datetime import datetime
 import os
 import time
 
+__version__ = "2012.10.03dev"
+
 # TODO:
 # - Find a way to get transparency work with wxGTK. However, it seems that
 #   SetTransparency doesn't work with wxGTK (Linux) after window creation:
@@ -565,7 +567,7 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
       "semaphore window always stays on top. A right click would\n"
       "show all options available."
     )
-    abinfo.Version = "2012.10.02"
+    abinfo.Version = __version__
     abinfo.Name = "Dose"
     abinfo.License = (
       "This program is free software: you can redistribute it and/or modify\n"
