@@ -67,7 +67,7 @@ LEDS_GREEN = (LED_OFF, LED_OFF, LED_GREEN)
 BACKGROUND_COLOR = 0x000000
 BACKGROUND_BORDER_COLOR = 0x7f7f7f7f
 TERMINAL_WIDTH = 79
-FILENAME_PATTERN_TO_IGNORE = "*.pyc; *.pyo; .git/*"
+FILENAME_PATTERN_TO_IGNORE = "*.pyc; *.pyo; .git/*; __pycache__/*"
 TIME_BEFORE_CALL = .5 # seconds between event and the call action
 
 def rounded_rectangle_region(width, height, radius):
@@ -534,7 +534,7 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
     ted = wx.TextEntryDialog(self, message=msg, caption=title,
                              defaultValue=self.skip_pattern)
     if ted.ShowModal() == wx.ID_OK:
-      self.call_string = ted.Value
+      self.skip_pattern = ted.Value
 
   def on_close(self, evt):
     """
