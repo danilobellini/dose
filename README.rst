@@ -1,5 +1,5 @@
-Dose !!!
-========
+Dose
+====
 
 An automated semaphore GUI showing the state in
 *test driven development*, mainly written for dojos.
@@ -9,7 +9,7 @@ Directory and watching
 
 **Dose** watches one directory for any kind of change
 new file, file modified, file removed, subdirectory renamed,
-etc.), including its subdirectories, by using the Python
+etc., including its subdirectories, by using the Python
 watchdog package. For example, changes on files ending on
 '.pyc' and '.pyo' are neglect by default, as well as git
 internals, but these skip patterns are *customizable*.
