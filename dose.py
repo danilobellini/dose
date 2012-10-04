@@ -68,7 +68,7 @@ BACKGROUND_COLOR = 0x000000
 BACKGROUND_BORDER_COLOR = 0x7f7f7f7f
 TERMINAL_WIDTH = 79
 FILENAME_PATTERN_TO_IGNORE = "*.pyc; *.pyo; .git/*; __pycache__/*"
-TIME_BEFORE_CALL = .5 # seconds between event and the call action
+TIME_BEFORE_CALL = .8 # seconds between event and the call action
 
 def rounded_rectangle_region(width, height, radius):
   """
