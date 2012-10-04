@@ -327,6 +327,7 @@ class DosePopupMenu(wx.Menu):
                          (None, None),
                          ("Directory to watch...", hc.on_directory_to_watch),
                          ("Define call string...", hc.on_define_call_string),
+                         ("Skip pattern...", hc.on_skip_pattern),
                         ])
     menu_items.extend([(None, None),
                        ("Close\tAlt+F4", hc.on_close),
@@ -351,6 +352,7 @@ class DoseWatcher(object):
   def __init__(self, printer=print):
     self.directory = os.path.curdir # Default directory
     self.call_string = ""
+    self.skip_pattern = FILENAME_PATTERN_TO_IGNORE
     self._watching = False
     self.printer = printer
 
@@ -386,7 +388,7 @@ class DoseWatcher(object):
 
           # Neglect calls from compiled or otherwise ignorable files
           path = os.path.relpath(evt.src_path, self.directory)
-          for pattern in FILENAME_PATTERN_TO_IGNORE.split(";"):
+          for pattern in self.skip_pattern.split(";"):
             if fnmatch(path, pattern.strip()):
               return
 
@@ -523,6 +525,14 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
     title = "Dose call string"
     ted = wx.TextEntryDialog(self, message=msg, caption=title,
                              defaultValue=self.call_string)
+    if ted.ShowModal() == wx.ID_OK:
+      self.call_string = ted.Value
+
+  def on_skip_pattern(self, evt):
+    msg = "File names, separated by ';', to have their changes neglected:"
+    title = "Skip pattern"
+    ted = wx.TextEntryDialog(self, message=msg, caption=title,
+                             defaultValue=self.skip_pattern)
     if ted.ShowModal() == wx.ID_OK:
       self.call_string = ted.Value
 
