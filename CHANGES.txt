@@ -1,4 +1,6 @@
 Development...
+
+2012.10.04
 - A better setup script for pip and easy_install with dependency check
 - Bounce effect (multi-calls for one change) no more
 - Customizable file skip pattern, defaults to "*.pyc; *.pyo; .git/*"

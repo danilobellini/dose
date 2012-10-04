@@ -10,8 +10,9 @@ Directory and watching
 **Dose** watches one directory for any kind of change
 new file, file modified, file removed, subdirectory renamed,
 etc.), including its subdirectories, by using the Python
-watchdog package. Changes on files ending on *".pyc"* and
-*".pyo"* are neglect.
+watchdog package. For example, changes on files ending on
+'.pyc' and '.pyo' are neglect by default, as well as git
+internals, but these skip patterns are *customizable*.
 
 What happens when something changes?
 """"""""""""""""""""""""""""""""""""
