@@ -21,7 +21,7 @@ Created on Sat Sep 29 2012
 danilo [dot] bellini [at] gmail [dot] com
 """
 
-from __future__ import division, print_function
+from __future__ import division, print_function, unicode_literals
 import wx
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -444,8 +444,9 @@ class DoseWatcher(object):
 
     # Starts the watchdog observer
     self._observer = Observer()
+    def p(x): print(x, type(x))
     self._observer.schedule(DoseSomethingChangedEventHandler(),
-                            path=self.directory,
+                            path=self.directory.encode("utf-8"),
                             recursive=True)
     DoseSomethingChangedEventHandler().on_any_event()
     self._observer.start()
