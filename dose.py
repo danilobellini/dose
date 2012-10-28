@@ -6,8 +6,7 @@ Copyright (C) 2012 Danilo de Jesus da Silva Bellini
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+the Free Software Foundation, version 3 of the License.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -54,7 +53,7 @@ FIRST_WIDTH = 100 # FIRST_* are starting values
 FIRST_HEIGHT = 300
 MIN_OPACITY = 0x10 # Color intensity in byte range
 MAX_OPACITY = 0xff
-FIRST_OPACITY = 0x70
+FIRST_OPACITY = 0x9f
 MOUSE_TIMER_WATCH = 20 # ms
 LED_OFF = 0x3f3f3f # Color
 LED_RED = 0xff0000
@@ -67,8 +66,13 @@ LEDS_GREEN = (LED_OFF, LED_OFF, LED_GREEN)
 BACKGROUND_COLOR = 0x000000
 BACKGROUND_BORDER_COLOR = 0x7f7f7f7f
 TERMINAL_WIDTH = 79
-FILENAME_PATTERN_TO_IGNORE = "*.pyc; *.pyo; .git/*; __pycache__/*"
-TIME_BEFORE_CALL = .8 # seconds between event and the call action
+FILENAME_PATTERN_TO_IGNORE = "; ".join(["*.pyc",
+                                        "*.pyo",
+                                        ".git/*",
+                                        "__pycache__/*",
+                                        "*__pycache__/*"
+                                       ])
+TIME_BEFORE_CALL = 1.0 # seconds between event and the call action
 
 def rounded_rectangle_region(width, height, radius):
   """
@@ -425,7 +429,7 @@ class DoseWatcher(object):
           func_stop(e)
           return
 
-        # Get the data from the process\\
+        # Get the data from the process
         for data, name in [(out, "Output data"), (err, "Error data")]:
           if len(data) > 0:
             self.printer(name.center(TERMINAL_WIDTH))
@@ -568,11 +572,11 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
       "the subprocess to finish."
       "\n\n"
       "The default directory path to watch is the one used to call\n"
-      "Dose. There's no default calling string, but 'nosetests'\n"
-      "would be a hint for Python developers. It should work even\n"
-      "with other languages TDD tools. To be fast, just open Dose\n"
-      "and double click on it, there's no need to lose time with\n"
-      "settings."
+      "Dose. There's no default calling string, but 'nosetests' and\n"
+      "'py.test' would be hints for Python developers. It should\n"
+      "work even with other languages TDD tools. To be fast, just\n"
+      "open Dose and double click on it, there's no need to lose\n"
+      "time with settings."
       "\n\n"
       "The GUI toolkit used in this project is wxPython. You can\n"
       "move the semaphore by dragging it around. Doing so with\n"
@@ -586,8 +590,7 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
     abinfo.License = (
       "This program is free software: you can redistribute it and/or modify\n"
       "it under the terms of the GNU General Public License as published by\n"
-      "the Free Software Foundation, either version 3 of the License, or\n"
-      "(at your option) any later version."
+      "the Free Software Foundation, either version 3 of the License."
       "\n\n"
       "This program is distributed in the hope that it will be useful,\n"
       "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"

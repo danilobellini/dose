@@ -6,8 +6,7 @@ Copyright (C) 2012 Danilo de Jesus da Silva Bellini
 
 Dose is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+the Free Software Foundation, version 3 of the License.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,18 +34,23 @@ with open(os.path.join(path, script_file), "r") as f:
       assignment = [side.strip() for side in line.split("=")]
       metadata[assignment[0].strip("_")] = eval(assignment[1])
 
-# Long description is all from README.txt, but the ending copyright message
+# Description is all from README.txt, but the ending copyright message
 with open(os.path.join(path, "README.rst"), "r") as f:
-  long_description = f.read()
-long_description = long_description.rsplit("----", 1)[0].strip()
+  readme_data = f.read()
+title, descr, ldescr = readme_data.split("\n\n", 2)
+metadata["description"] = descr
+metadata["long_description"] = "\n".join([title, ldescr]
+                                        ).rsplit("----", 1)[0].strip()
 
-classifiers = [
+# Classifiers and license
+metadata["license"] = "GPLv3"
+metadata["classifiers"] = [
   "Development Status :: 3 - Alpha",
   "Environment :: Win32 (MS Windows)",
   "Environment :: X11 Applications :: GTK",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: "
-    "GNU General Public License v3 or later (GPLv3+)",
+    "GNU General Public License v3 (GPLv3)",
   "Natural Language :: English",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
@@ -55,13 +59,9 @@ classifiers = [
   "Topic :: Software Development :: Testing",
 ]
 
-setup(name="dose",
-      description="Automated semaphore GUI showing the state in TDD",
-      long_description=long_description,
-      license="GPLv3",
-      scripts=[script_file],
-      classifiers=classifiers,
-      install_requires=["watchdog>=0.6.0",
-                        "wxPython"],
-      **metadata
-     )
+# Finish
+metadata["name"] = "dose"
+metadata["scripts"] = [script_file]
+metadata["install_requires"] = ["watchdog>=0.6.0",
+                                "wxPython"]
+setup(**metadata)

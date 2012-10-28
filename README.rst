@@ -2,10 +2,10 @@ Dose
 ====
 
 An automated semaphore GUI showing the state in
-*test driven development*, mainly written for dojos.
+test driven development (TDD), mainly written for dojos.
 
 Directory and watching
-""""""""""""""""""""""
+----------------------
 
 **Dose** watches one directory for any kind of change
 new file, file modified, file removed, subdirectory renamed,
@@ -15,7 +15,7 @@ watchdog package. For example, changes on files ending on
 internals, but these skip patterns are *customizable*.
 
 What happens when something changes?
-""""""""""""""""""""""""""""""""""""
+------------------------------------
 
 A *customized* subprocess is called, all its output/error
 data is left on the shell used to call Dose, and its return
@@ -24,17 +24,17 @@ green, else it it turns red. It stays yellow while waiting
 the subprocess to finish.
 
 Is it easy to use or should I spend hours to set it up?
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+-------------------------------------------------------
 
 The default directory path to watch is the one used to call
-Dose. There's no default calling string, but 'nosetests'
-would be a hint for Python developers. It should work even
-with other languages TDD tools. To be fast, just open Dose
-and double click on it, there's no need to lose time with
-settings.
+Dose. There's no default calling string, but 'nosetests' and
+'py.test' would be hints for Python developers. It should
+work even with other languages TDD tools. To be fast, just
+open Dose and double click on it, there's no need to lose
+time with settings.
 
 And the GUI?
-""""""""""""
+------------
 
 The GUI toolkit used in this project is wxPython. You can
 move the semaphore by dragging it around. Doing so with
