@@ -25,6 +25,7 @@ import wx
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from subprocess import Popen, PIPE
+import shlex
 from datetime import datetime
 import os
 import time
@@ -419,7 +420,8 @@ class DoseWatcher(object):
 
         # Subprocess calling
         try:
-          process = Popen(self.call_string.split(), stdout=PIPE, stderr=PIPE)
+          process = Popen(shlex.split(self.call_string),
+                          stdout=PIPE, stderr=PIPE)
           out, err = process.communicate()
           returned_value = process.wait()
         except Exception, e:
