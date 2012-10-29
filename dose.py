@@ -592,7 +592,7 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
     abinfo.License = (
       "This program is free software: you can redistribute it and/or modify\n"
       "it under the terms of the GNU General Public License as published by\n"
-      "the Free Software Foundation, either version 3 of the License."
+      "the Free Software Foundation, version 3 of the License."
       "\n\n"
       "This program is distributed in the hope that it will be useful,\n"
       "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
