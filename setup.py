@@ -37,6 +37,7 @@ with open(os.path.join(path, script_file), "r") as f:
 # Description is all from README.txt, but the ending copyright message
 with open(os.path.join(path, "README.rst"), "r") as f:
   readme_data = f.read()
+readme_data = readme_data.replace("\r\n", "\n")
 title, descr, ldescr = readme_data.split("\n\n", 2)
 metadata["description"] = descr
 metadata["long_description"] = "\n".join([title, ldescr]
