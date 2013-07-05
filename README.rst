@@ -49,4 +49,3 @@ Copyright (C) 2012 Danilo de Jesus da Silva Bellini
 - danilo [dot] bellini [at] gmail [dot] com
 
 License is GPLv3. See COPYING.txt for more details.
-

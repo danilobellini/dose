@@ -46,10 +46,11 @@ metadata["long_description"] = "\n".join([title, ldescr]
 # Classifiers and license
 metadata["license"] = "GPLv3"
 metadata["classifiers"] = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
   "Environment :: Win32 (MS Windows)",
   "Environment :: X11 Applications :: GTK",
   "Intended Audience :: Developers",
+  "Intended Audience :: Education",
   "License :: OSI Approved :: "
     "GNU General Public License v3 (GPLv3)",
   "Natural Language :: English",
@@ -63,6 +64,5 @@ metadata["classifiers"] = [
 # Finish
 metadata["name"] = "dose"
 metadata["scripts"] = [script_file]
-metadata["install_requires"] = ["watchdog>=0.6.0",
-                                "wxPython"]
+metadata["install_requires"] = ["watchdog>=0.6.0"] # Needs wxPython as well
 setup(**metadata)

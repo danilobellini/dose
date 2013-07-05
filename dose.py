@@ -31,7 +31,7 @@ import time
 from fnmatch import fnmatch
 
 # Metadata (see setup.py for more information about these)
-__version__ = "2012.10.04dev"
+__version__ = "1.0.0"
 __author__ = "Danilo de Jesus da Silva Bellini"
 __author_email__  = "danilo [dot] bellini [at] gmail [dot] com"
 __url__ = "http://github.com/danilobellini/dose"
@@ -70,7 +70,9 @@ FILENAME_PATTERN_TO_IGNORE = "; ".join(["*.pyc",
                                         "*.pyo",
                                         ".git/*",
                                         "__pycache__/*",
-                                        "*__pycache__/*"
+                                        "*__pycache__/*",
+                                        "__pycache__",
+                                        ".*"
                                        ])
 TIME_BEFORE_CALL = 1.0 # seconds between event and the call action
 
