@@ -615,6 +615,11 @@ class DoseApp(wx.App):
     self.SetTopWindow(wnd)
     return True # Needed by wxPython
 
-
 if __name__ == "__main__":
-    DoseApp(False).MainLoop()
+  import sys
+  app = DoseApp(False)
+  if len(sys.argv) > 1:
+    wnd = app.GetTopWindow()
+    wnd.call_string = " ".join(sys.argv[1:])
+    wnd.on_start()
+  app.MainLoop()
