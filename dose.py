@@ -396,10 +396,22 @@ class DoseWatcher(object):
             if fnmatch(path, pattern.strip()):
               return
 
+          # Logs
+          if not self.logged_blankline:
+            self.logged_blankline = True
+            self.printer() # Skip one line
+          self.printer("***" + repr(evt) + "***")
+
           # Neglect calls that happens too fast (bounce) with a time lag
           time.sleep(TIME_BEFORE_CALL)
           if event_time < self.last_etime:
             return
+
+        # First call logging
+        else:
+          self.printer() # Skip one line
+          self.logged_blankline = True
+          self.printer("*** First call ***")
 
         self.last_etime = event_time
 
@@ -411,7 +423,6 @@ class DoseWatcher(object):
 
         # Logging
         timestamp = datetime.now()
-        self.printer() # Skip one line
         self.printer("=" * TERMINAL_WIDTH)
         self.printer("Dose call at {0}".format(timestamp)
                                        .center(TERMINAL_WIDTH)
@@ -444,6 +455,7 @@ class DoseWatcher(object):
           self.printer("=" * TERMINAL_WIDTH)
 
         # Updates the state
+        self.logged_blankline = False # Now it'll skip a line next time
         if returned_value == 0:
           func_ok()
         else:
