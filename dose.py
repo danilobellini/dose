@@ -402,7 +402,12 @@ class DoseWatcher(object):
           if not self.logged_blankline:
             self.logged_blankline = True
             self.printer() # Skip one line
-          self.printer("***" + repr(evt) + "***")
+          self.printer(" ".join(["***",
+            "Directory" if evt.is_directory else "File",
+            evt.event_type + ":",
+            path.decode("utf-8"),
+            "***"
+          ]))
 
           # Neglect calls that happens too fast (bounce) with a time lag
           time.sleep(TIME_BEFORE_CALL)
