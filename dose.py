@@ -43,9 +43,15 @@ MIN_WIDTH = 9 # Pixels
 MIN_HEIGHT = 9
 FIRST_WIDTH = 100 # FIRST_* are starting values
 FIRST_HEIGHT = 300
+FIRST_TIMER_WIDTH = 300 # FIRST_* are starting values
+FIRST_TIMER_HEIGHT = 50
+FIRST_FRAME_X = 50
+FIRST_FRAME_Y = 50
+FIRST_FRAME_GAP = 10
 MIN_OPACITY = 0x10 # Color intensity in byte range
 MAX_OPACITY = 0xff
 FIRST_OPACITY = 0x9f
+FIRST_TIMER_OPACITY = 0x9f
 MOUSE_TIMER_WATCH = 20 # ms
 LED_OFF = 0x3f3f3f # Color
 LED_RED = 0xff0000
@@ -69,11 +75,20 @@ FILENAME_PATTERN_TO_IGNORE = "; ".join(["*.pyc",
 TIME_BEFORE_CALL = 1.0 # seconds between event and the call action
 CONFIG_FILE_NAME = ".dose.conf"
 CONFIG_DEFAULT_OPTIONS = {
-  "position": (-1, -1), # by default let the win system decide
-  "size": (FIRST_WIDTH, FIRST_HEIGHT),
-  "opacity": FIRST_OPACITY,
-  "flipped": False
+  "semaphore_position": (FIRST_FRAME_X, FIRST_FRAME_Y),
+  "semaphore_size": (FIRST_WIDTH, FIRST_HEIGHT),
+  "semaphore_opacity": FIRST_OPACITY,
+  "semaphore_flipped": False,
+  "timer_position": (FIRST_FRAME_X, 
+                     FIRST_FRAME_Y + FIRST_HEIGHT + FIRST_FRAME_GAP),
+  "timer_size": (FIRST_TIMER_WIDTH, FIRST_TIMER_HEIGHT),
+  "timer_opacity": FIRST_TIMER_OPACITY
 }
+DEFAULT_FRAME_STYLE = (wx.FRAME_SHAPED |     # Allows wx.SetShape
+                       wx.FRAME_NO_TASKBAR |
+                       wx.STAY_ON_TOP |
+                       wx.NO_BORDER
+                      )
 
 def rounded_rectangle_region(width, height, radius):
   """
@@ -100,30 +115,12 @@ def int_to_darkened_color(color_int):
   return int_to_color((color_int >> 1) & 0x7f7f7f) # Divide by 2 every color
 
 
-class DoseGraphicalSemaphore(wx.Frame):
-  """
-  Graphical semaphore frame widget (window)
-  Property "leds" contains the colors that should be seen (a 3-tuple with
-  24bit integers but can receive any sequence that quacks alike).
-  Property "opacity" controls transparency alpha factor from 0x00 (fully
-  transparency) to 0xff (no transparency)
-  Property "flip" is a boolean that can reverse the led order
-  This class knows nothing about the led color meaning, and just print them
-  at the screen.
-  """
-  def __init__(self, parent, config, leds=FIRST_LEDS):
-    self._config = config
-    frame_style = (wx.FRAME_SHAPED |     # Allows wx.SetShape
-                   wx.FRAME_NO_TASKBAR |
-                   wx.STAY_ON_TOP |
-                   wx.NO_BORDER
-                  )
-    pos = config.get_option("position")
-    size = config.get_option("size")
-    opacity = config.get_option("opacity")
-    flip = config.get_option("flipped")
-    super(DoseGraphicalSemaphore, self).__init__(parent, style=frame_style,
-                                                 pos=pos)
+class DoseGraphicalBaseFrame(wx.Frame):
+
+  def __init__(self, parent, pos, size,
+               opacity, frame_style=DEFAULT_FRAME_STYLE):
+    super(DoseGraphicalBaseFrame, self).__init__(parent, style=frame_style,
+                                        pos=pos)
     #self.BackgroundStyle = wx.BG_STYLE_CUSTOM # Avoids flicker
     self.Bind(wx.EVT_ERASE_BACKGROUND, lambda evt: None)
     self.Bind(wx.EVT_WINDOW_CREATE,
@@ -132,21 +129,8 @@ class DoseGraphicalSemaphore(wx.Frame):
     self._paint_width, self._paint_height = 0, 0 # Ensure update_sizes at
                                                  # first on_paint
     self.ClientSize = size
-    self._flip = flip
     self.opacity = opacity
     self.Bind(wx.EVT_PAINT, self.on_paint)
-    self.leds = leds # Refresh!
-
-  @property
-  def leds(self):
-    return self._leds
-
-  @leds.setter
-  def leds(self, values):
-    if len(values) != 3:
-      raise ValueError("There should be 3 leds")
-    self._leds = tuple(values)
-    self.Refresh()
 
   @property
   def opacity(self):
@@ -155,24 +139,14 @@ class DoseGraphicalSemaphore(wx.Frame):
   @opacity.setter
   def opacity(self, value):
     self._opacity = value
-    self._config.set_option("opacity", value)
     self.SetTransparent(self.opacity)
-
-  @property
-  def flip(self):
-    return self._flip
-
-  @flip.setter
-  def flip(self, value):
-    if self._flip != value:
-      self._flip = value
-      self._config.set_option("flipped", value)
-      self.Refresh()
 
   def on_paint(self, evt):
     if self.ClientSize != (self._paint_width, self._paint_height):
       self._update_sizes()
-    self._draw()
+    dc = wx.AutoBufferedPaintDCFactory(self)
+    gc = wx.GraphicsContext.Create(dc) # Anti-aliasing
+    self._draw(dc, gc)
 
   def _update_sizes(self):
     self._paint_width, self._paint_height = self.ClientSize
@@ -190,9 +164,7 @@ class DoseGraphicalSemaphore(wx.Frame):
                                            self._border)
                  )
 
-  def _draw(self):
-    dc = wx.AutoBufferedPaintDCFactory(self)
-    gc = wx.GraphicsContext.Create(dc) # Anti-aliasing
+  def _draw(self, dc, gc):
     gc.Translate(self._paint_width / 2,
                  self._paint_height / 2) # Center
 
@@ -206,6 +178,59 @@ class DoseGraphicalSemaphore(wx.Frame):
                             self._paint_width,
                             self._paint_height,
                             self._border)
+
+
+class DoseGraphicalSemaphore(DoseGraphicalBaseFrame):
+  """
+  Graphical semaphore frame widget (window)
+  Property "leds" contains the colors that should be seen (a 3-tuple with
+  24bit integers but can receive any sequence that quacks alike).
+  Property "opacity" controls transparency alpha factor from 0x00 (fully
+  transparency) to 0xff (no transparency)
+  Property "flip" is a boolean that can reverse the led order
+  This class knows nothing about the led color meaning, and just print them
+  at the screen.
+  """
+  def __init__(self, parent, config, leds=FIRST_LEDS):
+    self._config = config
+    pos = config.get_option("semaphore_position")
+    size = config.get_option("semaphore_size")
+    opacity = config.get_option("semaphore_opacity")
+    flip = config.get_option("semaphore_flipped")
+    super(DoseGraphicalSemaphore, self).__init__(parent,
+                                                 pos=pos, size=size,
+                                                 opacity=opacity)
+    self._flip = flip
+    self.leds = leds # Refresh!
+
+  @property
+  def leds(self):
+    return self._leds
+
+  @leds.setter
+  def leds(self, values):
+    if len(values) != 3:
+      raise ValueError("There should be 3 leds")
+    self._leds = tuple(values)
+    self.Refresh()
+
+  def opacity(self, value):
+    super(DoseGraphicalSemaphore, self).opacity(value)
+    self._config.set_option("semaphore_opacity", value)
+
+  @property
+  def flip(self):
+    return self._flip
+
+  @flip.setter
+  def flip(self, value):
+    if self._flip != value:
+      self._flip = value
+      self._config.set_option("semaphore_flipped", value)
+      self.Refresh()
+
+  def _draw(self, dc, gc):
+    super(DoseGraphicalSemaphore, self)._draw(dc, gc)
 
     # Draw the LEDs
     gc.Rotate(self._rotation)
@@ -225,12 +250,12 @@ class DoseGraphicalSemaphore(wx.Frame):
       gc.Translate(0, self._tile_size)
 
 
-class DoseInteractiveSemaphore(DoseGraphicalSemaphore):
+class DoseInteractiveBaseFrame(DoseGraphicalBaseFrame):
   """
-  Just a DojoGraphicalSemaphore, but now responsive to left click
+  Just a DoseGraphicalBaseFrame, but now responsive to left click
   """
   def __init__(self, parent, config):
-    super(DoseInteractiveSemaphore, self).__init__(parent, config)
+    super(DoseInteractiveBaseFrame, self).__init__(parent, config)
     self._config = config
     self._timer = wx.Timer(self)
     self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
@@ -296,7 +321,7 @@ class DoseInteractiveSemaphore(DoseGraphicalSemaphore):
                      )
           new_size = new_w, new_h
           self.ClientSize = new_size
-          self._config.set_option("size", new_size)
+          self.on_new_size(new_size)
           self.SendSizeEvent() # Needed for wxGTK
 
           # Center should be kept
@@ -311,13 +336,35 @@ class DoseInteractiveSemaphore(DoseGraphicalSemaphore):
                      self._click_frame_y + delta_y)
 
       if new_pos is not None:
-        self._config.set_option("position", new_pos)
+        self.on_new_pos(new_pos)
         self.Position = new_pos
         self.Refresh()
 
       # Since left button is kept down, there should be another one shot
       # timer event again, without creating many timers like wx.CallLater
       self._timer.Start(MOUSE_TIMER_WATCH, True)
+
+    def on_new_size(self, new_size):
+      pass
+
+    def on_new_pos(self, new_pos):
+      pass
+
+
+class DoseInteractiveSemaphore(DoseInteractiveBaseFrame, 
+                               DoseGraphicalSemaphore):
+  """
+  Just a DojoGraphicalSemaphore, but now responsive to left click
+  """
+  def __init__(self, parent, config):
+    super(DoseInteractiveSemaphore, self).__init__(parent, config)
+    self._config = config
+
+  def on_new_size(self, new_size):
+    self._config.set_option("semaphore_size", new_size)
+
+  def on_new_pos(self, new_pos):
+    self._config.set_option("semaphore_position", new_pos)
 
 
 class DosePopupMenu(wx.Menu):
@@ -543,10 +590,51 @@ class DoseConfig:
       self._config = CONFIG_DEFAULT_OPTIONS
 
 
+class DoseGraphicalTimer(DoseGraphicalBaseFrame):
+  """
+  """
+  def __init__(self, parent, config):
+    self._config = config
+    pos = config.get_option("timer_position")
+    size = config.get_option("timer_size")
+    opacity = config.get_option("timer_opacity")
+    super(DoseGraphicalTimer, self).__init__(parent, 
+                                                 pos=pos, size=size,
+                                                 opacity=opacity)
+
+  def opacity(self, value):
+    super(DoseGraphicalTimer, self).opacity(value)
+    self._config.set_option("timer_opacity", value)
+
+  def _draw(self, dc, gc):
+    super(DoseGraphicalTimer, self)._draw(dc, gc)
+
+
+class DoseInteractiveTimer(DoseInteractiveBaseFrame, 
+                           DoseGraphicalTimer):
+  """
+  Just a DoseGraphicalTimer, but now responsive to left click
+  """
+  def __init__(self, parent, config):
+    super(DoseInteractiveTimer, self).__init__(parent, config)
+    self._config = config
+
+  def on_new_size(self, new_size):
+    self._config.set_option("timer_size", new_size)
+
+  def on_new_pos(self, new_pos):
+    self._config.set_option("timer_position", new_pos)
+
+
+class DoseTimerWindow(DoseInteractiveTimer):
+
+  def __init__(self, parent, config):
+    super(DoseTimerWindow, self).__init__(parent, config)
+
+
 class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
 
-  def __init__(self, parent):
-    config = DoseConfig()
+  def __init__(self, parent, config):
     DoseInteractiveSemaphore.__init__(self, parent, config)
     DoseWatcher.__init__(self)
     self._config = config
@@ -688,9 +776,12 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
 class DoseApp(wx.App):
 
   def OnInit(self):
+    config = DoseConfig()
     self.SetAppName("dose")
-    wnd = DoseMainWindow(None)
+    wnd = DoseMainWindow(None, config)
     wnd.Show()
+    timer_wnd = DoseTimerWindow(wnd, config)
+    timer_wnd.Show()
     self.SetTopWindow(wnd)
     return True # Needed by wxPython
 
