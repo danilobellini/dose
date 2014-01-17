@@ -31,19 +31,10 @@ import time
 from fnmatch import fnmatch
 
 # Metadata (see setup.py for more information about these)
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__ = "Danilo de Jesus da Silva Bellini"
 __author_email__  = "danilo [dot] bellini [at] gmail [dot] com"
 __url__ = "http://github.com/danilobellini/dose"
-
-# TODO:
-# - Find a way to get transparency work with wxGTK. However, it seems that
-#   SetTransparency doesn't work with wxGTK (Linux) after window creation:
-#     http://trac.wxwidgets.org/ticket/13240
-#   but self.HasTransparentBackground() inside DojoGraphicalSemaphore
-#   opacity setter returns False, and it shouldn't.
-# - Remove flicker when resizing (wxGTK). Why wx.FULL_REPAINT_ON_RESIZE
-#   and wx.NO_FULL_REPAINT_ON_RESIZE behaves equally (wxGTK)?
 
 # Thresholds and other constants
 PI = 3.141592653589793
@@ -265,7 +256,8 @@ class DoseInteractiveSemaphore(DoseGraphicalSemaphore):
                                   self._click_frame_y) / height > .5 else -1
 
     # "Polling watcher" for mouse left button while it's kept down
-    if ms.leftDown:
+    if (wx.__version__ >= "3" and ms.leftIsDown) or \
+       (wx.__version__ <  "3" and ms.leftDown):
       if self._last_ms != (ms.x, ms.y): # Moved?
         self._last_ms = (ms.x, ms.y)
         delta_x = ms.x - self._click_ms_x
