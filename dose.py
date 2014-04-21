@@ -22,6 +22,7 @@ danilo [dot] bellini [at] gmail [dot] com
 
 from __future__ import division, print_function, unicode_literals
 import wx
+import wx.lib.masked
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from subprocess import Popen, PIPE
@@ -41,6 +42,8 @@ __url__ = "http://github.com/danilobellini/dose"
 PI = 3.141592653589793
 MIN_WIDTH = 9 # Pixels
 MIN_HEIGHT = 9
+TIMER_HORIZONTAL_SPACERS = 80
+TIMER_VERTICAL_SPACERS = 20
 FIRST_WIDTH = 100 # FIRST_* are starting values
 FIRST_HEIGHT = 300
 FIRST_TIMER_WIDTH = 300 # FIRST_* are starting values
@@ -62,6 +65,7 @@ LEDS_RED = (LED_RED, LED_OFF, LED_OFF)
 LEDS_YELLOW = (LED_OFF, LED_YELLOW, LED_OFF)
 LEDS_GREEN = (LED_OFF, LED_OFF, LED_GREEN)
 BACKGROUND_COLOR = 0x000000
+FOREGROUND_COLOR = 0xffffff
 BACKGROUND_BORDER_COLOR = 0x7f7f7f7f
 TERMINAL_WIDTH = 79
 FILENAME_PATTERN_TO_IGNORE = "; ".join(["*.pyc",
@@ -602,12 +606,77 @@ class DoseGraphicalTimer(DoseGraphicalBaseFrame):
                                                  pos=pos, size=size,
                                                  opacity=opacity)
 
+    self.sizer = wx.FlexGridSizer(3)
+    
+    self.sizer.AddGrowableCol(1)
+    self.sizer.AddGrowableRow(2)
+
+    self.SetSizer(self.sizer)
+
+    back_color = int_to_color(BACKGROUND_COLOR)
+    fore_color = int_to_color(FOREGROUND_COLOR)
+
+    self._text_control = wx.lib.masked.TextCtrl(self, mask="##:##",
+                                                      style=wx.NO_BORDER,
+                                                      emptyBackgroundColour=back_color,
+                                                      validBackgroundColour=back_color,
+                                                      foregroundColour=fore_color)
+    self._text_control.SetBackgroundColour(back_color)
+    self._text_control.SetForegroundColour(fore_color)
+
+    self._text_label = wx.lib.masked.TextCtrl(self, mask="##:##",
+                                                    style=wx.NO_BORDER,
+                                                    emptyBackgroundColour=back_color,
+                                                    validBackgroundColour=back_color,
+                                                    foregroundColour=fore_color)
+    self._text_label.SetBackgroundColour(back_color)
+    self._text_label.SetForegroundColour(fore_color)
+    self._text_label.SetEditable(False)
+    self._text_label.Hide()
+    
+    self.sizer.AddSpacer(20)
+    self.sizer.AddSpacer(20)
+    self.sizer.AddSpacer(20)
+
+    self.sizer.AddSpacer(20)
+    self.sizer.Add(self._text_control)
+    self.sizer.AddSpacer(20)
+
+    self.sizer.AddSpacer(20)
+    self.sizer.AddSpacer(20)
+    self.sizer.AddSpacer(20)
+    
+    self.update_text_size()
+
   def opacity(self, value):
     super(DoseGraphicalTimer, self).opacity(value)
     self._config.set_option("timer_opacity", value)
 
   def _draw(self, dc, gc):
     super(DoseGraphicalTimer, self)._draw(dc, gc)
+    self.update_text_size()
+
+  def update_text_size(self):
+    
+    client_size = self.ClientSize
+    client_width, client_height = client_size
+
+    character_count = 5 # 00:00
+
+    text_margin = 40
+    max_width = client_width - text_margin
+    char_width = max_width / character_count
+    max_height = client_height - text_margin
+
+    text_font = wx.FontFromPixelSize((char_width, max_height),
+                         family = wx.FONTFAMILY_MODERN,
+                         style = wx.FONTSTYLE_NORMAL,
+                         weight = wx.FONTWEIGHT_NORMAL)
+
+    self._text_control.SetFont(text_font)
+    self._text_label.SetFont(text_font)
+    self._text_control.SetSize((max_width, max_height))
+    self._text_label.SetSize((max_width, max_height))
 
 
 class DoseInteractiveTimer(DoseInteractiveBaseFrame, 
@@ -618,6 +687,11 @@ class DoseInteractiveTimer(DoseInteractiveBaseFrame,
   def __init__(self, parent, config):
     super(DoseInteractiveTimer, self).__init__(parent, config)
     self._config = config
+    self._text_control.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
+    self._text_control.Bind(wx.EVT_LEFT_DCLICK, self.on_left_dclick_control)
+    self._text_control.Bind(wx.EVT_KEY_DOWN, self.on_key_down_control)
+    self._text_label.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
+    self._text_label.Bind(wx.EVT_LEFT_DCLICK, self.on_left_dclick_label)
 
   def on_new_size(self, new_size):
     self._config.set_option("timer_size", new_size)
@@ -625,7 +699,27 @@ class DoseInteractiveTimer(DoseInteractiveBaseFrame,
   def on_new_pos(self, new_pos):
     self._config.set_option("timer_position", new_pos)
 
+  def on_left_dclick_control(self, evt):
+    self._text_control.SetFocus()
 
+  def on_key_down_control(self, evt):
+    key_code = evt.KeyCode
+    if key_code in {wx.WXK_ESCAPE, wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER}:
+      self._text_label.SetValue(self._text_control.GetValue())
+      self._text_control.Hide()
+      self._text_label.Show()
+      self.sizer.Replace(self._text_control, self._text_label)
+      self.sizer.Layout()
+    else:
+      evt.Skip()
+
+  def on_left_dclick_label(self, evt):
+    self._text_label.Hide()
+    self._text_control.Show()
+    self.sizer.Replace(self._text_label, self._text_control)
+    self.sizer.Layout()
+    self._text_control.SetFocus()
+    
 class DoseTimerWindow(DoseInteractiveTimer):
 
   def __init__(self, parent, config):
