@@ -21,15 +21,12 @@ danilo [dot] bellini [at] gmail [dot] com
 """
 
 from __future__ import division, print_function, unicode_literals
-import wx
+import wx, os, time, json
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from subprocess import Popen, PIPE
 from datetime import datetime
-import os
-import time
 from fnmatch import fnmatch
-import json
 
 # Metadata (see setup.py for more information about these)
 __version__ = "1.0.1"
@@ -47,6 +44,7 @@ MIN_OPACITY = 0x10 # Color intensity in byte range
 MAX_OPACITY = 0xff
 FIRST_OPACITY = 0x9f
 MOUSE_TIMER_WATCH = 20 # ms
+CONFIG_SAVE_LAG = 200 # ms
 LED_OFF = 0x3f3f3f # Color
 LED_RED = 0xff0000
 LED_YELLOW = 0xffff00
@@ -111,19 +109,15 @@ class DoseGraphicalSemaphore(wx.Frame):
   This class knows nothing about the led color meaning, and just print them
   at the screen.
   """
-  def __init__(self, parent, config, leds=FIRST_LEDS):
-    self._config = config
+  def __init__(self, parent, leds=FIRST_LEDS):
+    self._config = config = DoseConfig()
     frame_style = (wx.FRAME_SHAPED |     # Allows wx.SetShape
                    wx.FRAME_NO_TASKBAR |
                    wx.STAY_ON_TOP |
                    wx.NO_BORDER
                   )
-    pos = config.get_option("position")
-    size = config.get_option("size")
-    opacity = config.get_option("opacity")
-    flip = config.get_option("flipped")
     super(DoseGraphicalSemaphore, self).__init__(parent, style=frame_style,
-                                                 pos=pos)
+                                                 pos=config["position"])
     #self.BackgroundStyle = wx.BG_STYLE_CUSTOM # Avoids flicker
     self.Bind(wx.EVT_ERASE_BACKGROUND, lambda evt: None)
     self.Bind(wx.EVT_WINDOW_CREATE,
@@ -131,9 +125,12 @@ class DoseGraphicalSemaphore(wx.Frame):
              ) # Needed to at least have transparency on wxGTK
     self._paint_width, self._paint_height = 0, 0 # Ensure update_sizes at
                                                  # first on_paint
-    self.ClientSize = size
-    self._flip = flip
-    self.opacity = opacity
+    # Uses configuration (without changing the config dictionary)
+    self.ClientSize = config["size"]
+    self._flip = config["flipped"]
+    self._opacity = config["opacity"]
+    self.SetTransparent(config["opacity"])
+
     self.Bind(wx.EVT_PAINT, self.on_paint)
     self.leds = leds # Refresh!
 
@@ -149,33 +146,49 @@ class DoseGraphicalSemaphore(wx.Frame):
     self.Refresh()
 
   @property
+  def size(self):
+    return self.ClientSize
+
+  @size.setter
+  def size(self, pair):
+    self.ClientSize = self._config["size"] = pair
+    self.SendSizeEvent() # Needed for wxGTK
+
+  @property
+  def pos(self):
+    return self.Position
+
+  @pos.setter
+  def pos(self, pair):
+    self.Position = self._config["position"] = pair
+    self.Refresh()
+
+  @property
   def opacity(self):
-    return self._opacity
+    return self._config["opacity"]
 
   @opacity.setter
   def opacity(self, value):
-    self._opacity = value
-    self._config.set_option("opacity", value)
-    self.SetTransparent(self.opacity)
+    self._config["opacity"] = value
+    self.SetTransparent(value)
 
   @property
   def flip(self):
-    return self._flip
+    return self._config["flipped"]
 
   @flip.setter
   def flip(self, value):
-    if self._flip != value:
-      self._flip = value
-      self._config.set_option("flipped", value)
+    if self._config["flipped"] != value:
+      self._config["flipped"] = value
       self.Refresh()
 
   def on_paint(self, evt):
-    if self.ClientSize != (self._paint_width, self._paint_height):
+    if self.size != (self._paint_width, self._paint_height):
       self._update_sizes()
     self._draw()
 
   def _update_sizes(self):
-    self._paint_width, self._paint_height = self.ClientSize
+    self._paint_width, self._paint_height = self.size
     self._rotation = -PI/2 if self._paint_width > self._paint_height else 0
     self._tile_size = min(max(self._paint_width, self._paint_height),
                           min(self._paint_width, self._paint_height) * 3
@@ -229,9 +242,8 @@ class DoseInteractiveSemaphore(DoseGraphicalSemaphore):
   """
   Just a DojoGraphicalSemaphore, but now responsive to left click
   """
-  def __init__(self, parent, config):
-    super(DoseInteractiveSemaphore, self).__init__(parent, config)
-    self._config = config
+  def __init__(self, parent):
+    super(DoseInteractiveSemaphore, self).__init__(parent)
     self._timer = wx.Timer(self)
     self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
     self.Bind(wx.EVT_TIMER, self.on_timer, self._timer)
@@ -257,15 +269,15 @@ class DoseInteractiveSemaphore(DoseGraphicalSemaphore):
 
       # Keep state at click
       self._click_ms_x, self._click_ms_y = ms.x, ms.y
-      self._click_frame_x, self._click_frame_y = self.Position
-      self._click_frame_width, self._click_frame_height = self.ClientSize
+      self._click_frame_x, self._click_frame_y = self.pos
+      self._click_frame_width, self._click_frame_height = self.size
       self._click_opacity = self.opacity
 
       # Avoids refresh when there's no move (stores last mouse state)
       self._last_ms = ms.x, ms.y
 
       # Quadrant at click (need to know how to resize)
-      width, height = self.ClientSize
+      width, height = self.size
       self._quad_signal_x = 1 if (self._click_ms_x -
                                   self._click_frame_x) / width > .5 else -1
       self._quad_signal_y = 1 if (self._click_ms_y -
@@ -294,10 +306,7 @@ class DoseInteractiveSemaphore(DoseGraphicalSemaphore):
           new_h = max(MIN_HEIGHT, self._click_frame_height +
                                   2 * delta_y * self._quad_signal_y
                      )
-          new_size = new_w, new_h
-          self.ClientSize = new_size
-          self._config.set_option("size", new_size)
-          self.SendSizeEvent() # Needed for wxGTK
+          self.size = new_w, new_h
 
           # Center should be kept
           center_x = self._click_frame_x + self._click_frame_width / 2
@@ -311,9 +320,7 @@ class DoseInteractiveSemaphore(DoseGraphicalSemaphore):
                      self._click_frame_y + delta_y)
 
       if new_pos is not None:
-        self._config.set_option("position", new_pos)
-        self.Position = new_pos
-        self.Refresh()
+        self.pos = new_pos
 
       # Since left button is kept down, there should be another one shot
       # timer event again, without creating many timers like wx.CallLater
@@ -498,58 +505,44 @@ class DoseWatcher(object):
       self._watching = False
 
 
-class DoseConfig:
+class DoseConfig(dict):
   """
   Handle load and storage of configuration options.
 
   When dose starts, try to load configurations from
-  a file named ".dose.conf" in the following 
+  a file named ".dose.conf" in the following
   locations:
 
   1) Working directory (TODO!)
   2) User home
 
-  If none of these files are present, dose 
+  If none of these files are present, dose
   fallback to default values.
   """
+  path = os.path.join(os.path.expanduser("~"), CONFIG_FILE_NAME)
 
-  def get_option(self, key):
-    return self._config.get(key, CONFIG_DEFAULT_OPTIONS[key])
+  def __missing__(self, key): # This allows saving ONLY what changes
+    return CONFIG_DEFAULT_OPTIONS[key]
 
-  def set_option(self, key, value):
-    self._config[key] = value
-
-  def _user_home_config_file_path(self):
-    user_home = os.path.expanduser("~")
-    path = os.path.join(user_home, CONFIG_FILE_NAME)
-    return path
+  def __setitem__(self, k, v):
+    super(DoseConfig, self).__setitem__(k, v)
+    self.store_options()
 
   def store_options(self):
-    """
-    Store options in the user's home, only if 
-    dose has not been launched with working 
-    directory configs (TODO!).
-    """
-    path = self._user_home_config_file_path()
-    config_file = open(path, "w")
-    json.dump(self._config, config_file, indent=4, separators=(',',': '))
+    with open(self.path, "w") as config_file:
+      json.dump(self, config_file, indent=4, separators=(',',': '))
 
   def __init__(self):
-    path = self._user_home_config_file_path()
-    if os.path.exists(path):
-      config_file = open(path, "r")
-      self._config = json.load(config_file)
-    else:
-      self._config = CONFIG_DEFAULT_OPTIONS
+    if os.path.exists(self.path):
+      with open(self.path, "r") as config_file:
+        self.update(json.load(config_file))
 
 
 class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
 
   def __init__(self, parent):
-    config = DoseConfig()
-    DoseInteractiveSemaphore.__init__(self, parent, config)
+    DoseInteractiveSemaphore.__init__(self, parent)
     DoseWatcher.__init__(self)
-    self._config = config
     self.SetTitle("Disabled - dose") # Seen by the window manager
     self.popmenu = {k:DosePopupMenu(self, k) for k in (True, False)}
 
@@ -628,7 +621,6 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
     if evt.EventObject is not self: # Avoid deadlocks
       self.Close() # wx.Frame
     evt.Skip()
-    self._config.store_options()
 
   def on_help_and_about(self, evt):
     abinfo = wx.AboutDialogInfo()
