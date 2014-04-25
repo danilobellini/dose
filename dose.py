@@ -510,14 +510,14 @@ class DoseConfig(dict):
   Handle load and storage of configuration options.
 
   When dose starts, try to load configurations from
-  a file named ".dose.conf" in the following
-  locations:
+  a file named ".dose.conf" in the following locations:
 
-  1) Working directory (TODO!)
+  1) Working directory
   2) User home
 
-  If none of these files are present, dose
-  fallback to default values.
+  If none of these files are present, dose fallback to default values.
+  Configuration changes automatically schedules its storage/saving process to
+  the configuration file after a few milliseconds.
   """
   path = os.path.join(os.path.expanduser("~"), CONFIG_FILE_NAME)
 
@@ -526,7 +526,7 @@ class DoseConfig(dict):
 
   def __setitem__(self, k, v):
     super(DoseConfig, self).__setitem__(k, v)
-    self.timer.cancel()
+    self.timer.cancel() # Debounce
     self.timer = threading.Timer(CONFIG_SAVE_LAG * 1e-3, self.store_options)
     self.timer.start()
 
@@ -535,7 +535,11 @@ class DoseConfig(dict):
       json.dump(self, config_file, indent=4, separators=(',',': '))
 
   def __init__(self):
-    if os.path.exists(self.path):
+    if os.path.exists(DoseConfig.path):
+      with open(DoseConfig.path, "r") as config_file:
+        self.update(json.load(config_file))
+    if os.path.exists(CONFIG_FILE_NAME):
+      self.path = os.path.abspath(CONFIG_FILE_NAME)
       with open(self.path, "r") as config_file:
         self.update(json.load(config_file))
     self.timer = threading.Timer(0, lambda: None) # timer.cancel now exists
