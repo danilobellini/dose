@@ -21,7 +21,7 @@ danilo [dot] bellini [at] gmail [dot] com
 """
 
 from __future__ import division, print_function, unicode_literals
-import wx, os, time, json
+import wx, os, time, json, threading
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from subprocess import Popen, PIPE
@@ -526,7 +526,9 @@ class DoseConfig(dict):
 
   def __setitem__(self, k, v):
     super(DoseConfig, self).__setitem__(k, v)
-    self.store_options()
+    self.timer.cancel()
+    self.timer = threading.Timer(CONFIG_SAVE_LAG * 1e-3, self.store_options)
+    self.timer.start()
 
   def store_options(self):
     with open(self.path, "w") as config_file:
@@ -536,6 +538,7 @@ class DoseConfig(dict):
     if os.path.exists(self.path):
       with open(self.path, "r") as config_file:
         self.update(json.load(config_file))
+    self.timer = threading.Timer(0, lambda: None) # timer.cancel now exists
 
 
 class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
