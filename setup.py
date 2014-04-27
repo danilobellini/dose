@@ -63,6 +63,7 @@ metadata["classifiers"] = [
 
 # Finish
 metadata["name"] = "dose"
-metadata["scripts"] = [script_file]
+metadata["entry_points"] = {"console_scripts": ["dose=dose:main"]}
+metadata["py_modules"] = ["dose"]
 metadata["install_requires"] = ["watchdog>=0.6.0"] # Needs wxPython as well
 setup(**metadata)
