@@ -38,9 +38,9 @@ with open(os.path.join(path, script_file), "r") as f:
 with open(os.path.join(path, "README.rst"), "r") as f:
   readme_data = f.read()
 readme_data = readme_data.replace("\r\n", "\n")
-title, descr, ldescr = readme_data.split("\n\n", 2)
+title, pins, descr, ldescr = readme_data.split("\n\n", 3)
 metadata["description"] = descr
-metadata["long_description"] = "\n".join([title, ldescr]
+metadata["long_description"] = "\n".join([title, "", pins, "", ldescr]
                                         ).rsplit("----", 1)[0].strip()
 
 # Classifiers and license
