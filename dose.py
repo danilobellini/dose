@@ -62,7 +62,9 @@ FILENAME_PATTERN_TO_IGNORE = "; ".join(["*.pyc",
                                         "__pycache__/*",
                                         "*__pycache__/*",
                                         "__pycache__",
-                                        ".*"
+                                        ".*",
+                                        "*~",
+                                        "qt_temp.*", # Kate
                                        ])
 TIME_BEFORE_CALL = 1.0 # seconds between event and the call action
 CONFIG_FILE_NAME = ".dose.conf"
