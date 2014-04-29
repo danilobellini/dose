@@ -705,5 +705,6 @@ def main():
   app.MainLoop()
 
 if __name__ == "__main__":
+  print('DEPRECATED! Call the "dose" script instead (without ".py").')
   main()
 
