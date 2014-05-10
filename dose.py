@@ -27,6 +27,7 @@ from watchdog.events import FileSystemEventHandler
 from subprocess import Popen, PIPE
 from datetime import datetime
 from fnmatch import fnmatch
+from functools import wraps
 
 # Metadata (see setup.py for more information about these)
 __version__ = "1.0.1"
@@ -507,6 +508,22 @@ class DoseWatcher(object):
       self._watching = False
 
 
+def call_after(lag):
+  """
+  Parametrized decorator for calling a function after a time ``lag`` given
+  in milliseconds. This cancels simultaneous calls.
+  """
+  def decorator(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+      wrapper.timer.cancel() # Debounce
+      wrapper.timer = threading.Timer(lag, func, args=args, kwargs=kwargs)
+      wrapper.timer.start()
+    wrapper.timer = threading.Timer(0, lambda: None) # timer.cancel now exists
+    return wrapper
+  return decorator
+
+
 class DoseConfig(dict):
   """
   Handle load and storage of configuration options.
@@ -528,10 +545,9 @@ class DoseConfig(dict):
 
   def __setitem__(self, k, v):
     super(DoseConfig, self).__setitem__(k, v)
-    self.timer.cancel() # Debounce
-    self.timer = threading.Timer(CONFIG_SAVE_LAG * 1e-3, self.store_options)
-    self.timer.start()
+    self.store_options()
 
+  @call_after(CONFIG_SAVE_LAG * 1e-3)
   def store_options(self):
     with open(self.path, "w") as config_file:
       json.dump(self, config_file, indent=4, separators=(',',': '))
@@ -544,7 +560,6 @@ class DoseConfig(dict):
       self.path = os.path.abspath(CONFIG_FILE_NAME)
       with open(self.path, "r") as config_file:
         self.update(json.load(config_file))
-    self.timer = threading.Timer(0, lambda: None) # timer.cancel now exists
 
 
 class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
