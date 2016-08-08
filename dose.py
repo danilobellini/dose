@@ -30,9 +30,9 @@ from fnmatch import fnmatch
 from functools import wraps
 
 # Metadata (see setup.py for more information about these)
-__version__ = "1.0.1"
+__version__ = "1.0.1.dev"
 __author__ = "Danilo de Jesus da Silva Bellini"
-__author_email__  = "danilo [dot] bellini [at] gmail [dot] com"
+__author_email__  = "danilo.bellini@gmail.com"
 __url__ = "http://github.com/danilobellini/dose"
 
 # Thresholds and other constants

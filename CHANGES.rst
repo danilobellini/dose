@@ -22,6 +22,8 @@ v1.1.0
 
     $ dose.py py.test
 
+* The setup script ``setup.py`` was completely rewritten.
+
 
 v1.0.1
 ------

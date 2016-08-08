@@ -6,8 +6,12 @@ Dose
 .. image:: https://pypip.in/v/dose/badge.png
   :target: https://pypi.python.org/pypi/dose/
 
+.. summary
+
 An automated semaphore GUI showing the state in
 test driven development (TDD), mainly written for dojos.
+
+.. summary end
 
 Directory and watching
 ----------------------
