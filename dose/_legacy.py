@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Dose - Automated semaphore GUI showing the state in test driven development
@@ -28,12 +27,6 @@ from subprocess import Popen, PIPE
 from datetime import datetime
 from fnmatch import fnmatch
 from functools import wraps
-
-# Metadata (see setup.py for more information about these)
-__version__ = "1.0.1.dev"
-__author__ = "Danilo de Jesus da Silva Bellini"
-__author_email__  = "danilo.bellini@gmail.com"
-__url__ = "http://github.com/danilobellini/dose"
 
 # Thresholds and other constants
 PI = 3.141592653589793
@@ -574,6 +567,10 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
     self.Bind(wx.EVT_LEFT_DCLICK, self.on_left_dclick)
     self.Bind(wx.EVT_CLOSE, self.on_close)
 
+  def auto_start(self, test_command):
+    self.call_string = test_command
+    self.on_start()
+
   def on_right_down(self, evt):
     self.PopupMenu(self.popmenu[self.watching], evt.Position)
 
@@ -699,27 +696,3 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
     )
     abinfo.WebSite = __url__
     wx.AboutBox(abinfo)
-
-
-class DoseApp(wx.App):
-
-  def OnInit(self):
-    self.SetAppName("dose")
-    wnd = DoseMainWindow(None)
-    wnd.Show()
-    self.SetTopWindow(wnd)
-    return True # Needed by wxPython
-
-def main():
-  import sys
-  app = DoseApp(False)
-  if len(sys.argv) > 1:
-    wnd = app.GetTopWindow()
-    wnd.call_string = " ".join(sys.argv[1:])
-    wnd.on_start()
-  app.MainLoop()
-
-if __name__ == "__main__":
-  print('DEPRECATED! Call the "dose" script instead (without ".py").')
-  main()
-

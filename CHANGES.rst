@@ -13,16 +13,36 @@ v1.1.0
   at the current directory when it exists, otherwise it's loaded/saved
   at the home directory.
 
-* Add a console script entry point to dose, so it can be called directly
-  with something like::
+* Dose became a package including a prepared ``__main__.py`` module for
+  running it with ``python -m``. For example::
+
+    $ python2 -m dose py.test
+
+  or the new console script without extension::
 
     $ dose py.test
 
-  instead of::
-
-    $ dose.py py.test
+  The legacy ``dose.py`` was completely removed, as the
+  ``/usr/bin/dose.py`` (Linux path) was shadowing the installed
+  ``dose`` package on importing, i.e., ``import dose`` used to import
+  the ``dose.py`` script/module instead of the package.
 
 * The setup script ``setup.py`` was completely rewritten.
+
+* Bug fix: the given quoted/escaped arguments from the command line
+  like::
+
+    $ dose python -m doctest "Project Example [2]/main.rst"
+    $ dose python -m doctest Project\ Example\ \[2\]/main.rst
+
+  used to be internally re-joined losing the quoting/escaping
+  information, behaving like this::
+
+    $ dose python -m doctest Project Example [2]/main.rst
+
+  Now the arguments are properly escaped when joining them as a single
+  shell command to call ``subprocess.Popen``, unless there's only a
+  single argument, which might include pipes and redirection.
 
 
 v1.0.1

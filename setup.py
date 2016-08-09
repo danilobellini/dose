@@ -6,7 +6,7 @@ BLOCK_START = ".. %s"
 BLOCK_END = ".. %s end"
 
 SDIST_DIR = os.path.dirname(__file__)
-METADATA_FILE = os.path.join(SDIST_DIR, "dose.py")
+METADATA_FILE = os.path.join(SDIST_DIR, os.path.join("dose", "__init__.py"))
 
 with open(os.path.join(SDIST_DIR, "README.rst"), "r") as f:
     README = f.read().splitlines()
@@ -63,10 +63,9 @@ metadata = {
   "description": single_line(get_block("summary", README)),
   "long_description": all_but_block("summary", README),
   "license": "GPLv3",
-  "py_modules": ["dose"],
+  "packages": ["dose"],
   "install_requires": ["watchdog>=0.6.0"], # Needs wxPython as well
-  "entry_points": {"console_scripts": ["dose = dose:main"]},
-  "scripts": ["dose.py"], # Deprecated
+  "entry_points": {"console_scripts": ["dose = dose.__main__:main"]},
 }
 
 metadata["classifiers"] = """

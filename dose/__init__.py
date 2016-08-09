@@ -1,0 +1,5 @@
+"""Dose GUI for TDD"""
+__version__ = "1.0.1.dev"
+__author__ = "Danilo de Jesus da Silva Bellini"
+__author_email__  = "danilo.bellini@gmail.com"
+__url__ = "http://github.com/danilobellini/dose"
