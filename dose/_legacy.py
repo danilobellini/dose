@@ -391,11 +391,20 @@ class DoseWatcher(object):
                          RunnerThreadCallback)
 
     def selector(evt):
+      if not self._runner.is_alive():
+        self._last_fnames = []
+      if evt.event_type != "modified" or evt.is_directory:
+        return False
       path = os.path.relpath(evt.src_path, self.directory)
+      if path in self._last_fnames: # Detected a "killing cycle"
+        print(FG_MAGENTA + "*** Cycle detected! ***".center(TERMINAL_WIDTH)
+                         + FG_RESET)
+        print_header(evt, color=FG_MAGENTA)
+        return False
       for pattern in self.skip_pattern.split(";"):
         if fnmatch(path, pattern.strip()):
           return False
-      return evt.event_type == "modified" and not evt.is_directory
+      return True
 
     def end_callback(result):
       if result == 0:
@@ -413,8 +422,8 @@ class DoseWatcher(object):
       print("=" * TERMINAL_WIDTH + FG_RESET)
       func_stop(exc)
 
-    def print_header(evt):
-      print(FG_CYAN + " ".join(["***",
+    def print_header(evt, color=FG_CYAN):
+      print(color + " ".join(["***",
         "Directory" if evt.is_directory else "File",
         evt.event_type + ":",
         os.path.relpath(evt.src_path, self.directory).decode("utf-8"),
@@ -436,11 +445,13 @@ class DoseWatcher(object):
       self._runner.start()
 
     def watchdog_handler(evt):
+      self._last_fnames.append(os.path.relpath(evt.src_path, self.directory))
       self._runner.kill()
       print_header(evt)
       run_subprocess()
 
     # Force a first event
+    self._last_fnames = []
     print(FG_CYAN + "*** First call ***".center(TERMINAL_WIDTH) + FG_RESET)
     run_subprocess()
 

@@ -11,7 +11,8 @@ v1.1.0
 
 * Brand new *killing* feature: the running test process now is killed
   when another event is triggered, and there's no delay to start the
-  test job subprocess anymore. To kill the current running process
+  test job subprocess anymore. Cycles are detected to avoid an endless
+  killing-spawning loop. To kill the current running process
   purposefully, one just need to double click dose with the left mouse
   button.
 
