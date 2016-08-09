@@ -1,10 +1,15 @@
 #!/usr/bin/env python2
 """Dose GUI for TDD: test job runner."""
-import subprocess, threading, sys, contextlib
+import subprocess, threading, sys, contextlib, errno, time
 
+# https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 FG_RED = b"\x1b[31m"
 FG_YELLOW = b"\x1b[33m"
+FG_MAGENTA = b"\x1b[35m"
+FG_CYAN = b"\x1b[36m"
 FG_RESET = b"\x1b[39m"
+
+SMALL_DURATION = 0.05 # Seconds, used for non-blocking polling loops
 
 
 def run_stderr(process, stream, size=1):
@@ -39,6 +44,40 @@ def runner(test_command):
             finally:
                 if process.poll() is None:
                     process.terminate()
+
+
+class RunnerThreadCallback(threading.Thread):
+
+    def __init__(self, test_command, end_callback, exc_callback):
+        self.test_command = test_command
+        self.end_callback = end_callback
+        self.exc_callback = exc_callback
+        self.lock = threading.Lock()
+        super(RunnerThreadCallback, self).__init__()
+
+    def kill(self):
+        while self.is_alive():
+            with self.lock:
+                if not hasattr(self, "process"):
+                    time.sleep(SMALL_DURATION) # Still not initialized, wait
+                    continue
+                if self.process.poll() is None: # It's running
+                    self.process.terminate()
+            break # We already either killed or finished it
+        self.join()
+
+    def run(self):
+        try:
+            with runner(self.test_command) as self.process:
+                result = None
+                while result is None:
+                    time.sleep(SMALL_DURATION)
+                    with self.lock:
+                        result = self.process.poll()
+        except Exception as exc:
+            self.exc_callback(exc)
+        else:
+            self.end_callback(result)
 
 
 if __name__ == "__main__":

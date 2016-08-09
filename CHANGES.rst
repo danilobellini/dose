@@ -4,10 +4,32 @@ Dose change log
 v1.1.0
 ------
 
+* To avoid several simultaneous triggers for a single action being
+  done (e.g. lots of events for each file while creating the source
+  distribution to test with ``tox``), now only the file modifications
+  events trigger a new test job.
+
+* Brand new *killing* feature: the running test process now is killed
+  when another event is triggered, and there's no delay to start the
+  test job subprocess anymore. To kill the current running process
+  purposefully, one just need to double click dose with the left mouse
+  button.
+
 * New test job runner with realtime standard output/error streams.
   Each output/error byte is now printed as soon as possible, instead
-  of waiting the process to finish. The sys.stderr is now written in
-  red by using the ANSI escape codes for printing colored output.
+  of waiting the process to finish.
+
+* New colored output by printing the ANSI escape codes. The different
+  colors used are:
+
+  - Testing process standard error (sys.strerr): red.
+  - Test job timestamp: yellow.
+  - "Killed!" message: magenta/purple.
+  - Event header/description: cyan/turquoise.
+  - Exceptions: red.
+
+  The messages themselves were modified to be centralized, and the
+  timestamp now is just prefixed by ``[Dose]``.
 
 * New external configuration file for loading/saving the aesthetic GUI
   state (window position, size, opacity and flip flag). The config is

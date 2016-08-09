@@ -20,9 +20,7 @@ danilo [dot] bellini [at] gmail [dot] com
 """
 
 from __future__ import division, print_function, unicode_literals
-import wx, os, time, json, threading
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+import wx, os, json, threading
 from datetime import datetime
 from fnmatch import fnmatch
 from functools import wraps
@@ -59,7 +57,6 @@ FILENAME_PATTERN_TO_IGNORE = "; ".join(["*.pyc",
                                         "*~",
                                         "qt_temp.*", # Kate
                                        ])
-TIME_BEFORE_CALL = 1.0 # seconds between event and the call action
 CONFIG_FILE_NAME = ".dose.conf"
 CONFIG_DEFAULT_OPTIONS = {
   "position": (-1, -1), # by default let the win system decide
@@ -370,12 +367,11 @@ class DoseWatcher(object):
   """
   A class to watch
   """
-  def __init__(self, printer=print):
+  def __init__(self):
     self.directory = os.path.curdir # Default directory
     self.call_string = ""
     self.skip_pattern = FILENAME_PATTERN_TO_IGNORE
     self._watching = False
-    self.printer = printer
 
   @property
   def watching(self):
@@ -391,98 +387,74 @@ class DoseWatcher(object):
     """
     assert not self.watching
 
-    class DoseSomethingChangedEventHandler(FileSystemEventHandler):
+    from .runner import (FG_RED, FG_YELLOW, FG_MAGENTA, FG_CYAN, FG_RESET,
+                         RunnerThreadCallback)
 
-      def on_any_event(handler, evt=None):
-        """
-        Handle the event "directory has changed its contents somehow"
-        Using "handler" instead of "self" for class instance, so "self" is a
-        DoseWatcher instance, and self.printer may change while watching.
-        That's also useful to store "self.last_mtime", since there's a new
-        handler instance for each event.
-        """
-        # ---------------------------------------
-        # Event filters (to avoid unuseful calls)
-        # ---------------------------------------
-        event_time = time.time()
-        if evt is not None: # If not the first event
+    def selector(evt):
+      path = os.path.relpath(evt.src_path, self.directory)
+      for pattern in self.skip_pattern.split(";"):
+        if fnmatch(path, pattern.strip()):
+          return False
+      return evt.event_type == "modified" and not evt.is_directory
 
-          # Neglect calls from compiled or otherwise ignorable files
-          path = os.path.relpath(evt.src_path, self.directory)
-          for pattern in self.skip_pattern.split(";"):
-            if fnmatch(path, pattern.strip()):
-              return
+    def end_callback(result):
+      if result == 0:
+        func_ok()
+      elif result > 0:
+        func_err()
+      else: # SIGTERM or SIGKILL
+        print(FG_MAGENTA + "*** Killed! ***".center(TERMINAL_WIDTH)
+                         + FG_RESET)
 
-          # Logs
-          if not self.logged_blankline:
-            self.logged_blankline = True
-            self.printer() # Skip one line
-          self.printer(" ".join(["***",
-            "Directory" if evt.is_directory else "File",
-            evt.event_type + ":",
-            path.decode("utf-8"),
-            "***"
-          ]))
+    def exc_callback(exc):
+      self.stop() # Watching no more
+      print(FG_RED + "=" * TERMINAL_WIDTH)
+      print("Error while calling".center(TERMINAL_WIDTH))
+      print("=" * TERMINAL_WIDTH + FG_RESET)
+      func_stop(exc)
 
-          # Neglect calls that happens too fast (bounce) with a time lag
-          time.sleep(TIME_BEFORE_CALL)
-          if event_time < self.last_etime:
-            return
+    def print_header(evt):
+      print(FG_CYAN + " ".join(["***",
+        "Directory" if evt.is_directory else "File",
+        evt.event_type + ":",
+        os.path.relpath(evt.src_path, self.directory).decode("utf-8"),
+        "***"
+      ]).center(TERMINAL_WIDTH) + FG_RESET)
 
-        # First call logging
-        else:
-          self.printer() # Skip one line
-          self.logged_blankline = True
-          self.printer("*** First call ***")
+    def print_timestamp():
+      timestamp = datetime.now()
+      print(FG_YELLOW + "=" * TERMINAL_WIDTH)
+      print("[Dose] {0}".format(timestamp).center(TERMINAL_WIDTH))
+      print("=" * TERMINAL_WIDTH + FG_RESET)
 
-        self.last_etime = event_time
+    def run_subprocess():
+      print_timestamp()
+      func_wait() # State changed: "waiting" for a subprocess to finish
+      self._runner = RunnerThreadCallback(test_command=self.call_string,
+                                    end_callback=end_callback,
+                                    exc_callback=exc_callback)
+      self._runner.start()
 
-        # ------------------
-        # Subprocess calling
-        # ------------------
-        # State changed: "waiting" for a subprocess (still not called)
-        func_wait()
+    def watchdog_handler(evt):
+      self._runner.kill()
+      print_header(evt)
+      run_subprocess()
 
-        # Logging
-        timestamp = datetime.now()
-        self.printer("=" * TERMINAL_WIDTH)
-        self.printer("Dose call at {0}".format(timestamp)
-                                       .center(TERMINAL_WIDTH)
-                    )
-
-        # Subprocess calling
-        from .runner import runner
-        try:
-          with runner(self.call_string) as process:
-            returned_value = process.wait()
-        except Exception, e:
-          self.stop() # Watching no more
-          self.printer("Error while calling".center(TERMINAL_WIDTH))
-          self.printer("=" * TERMINAL_WIDTH)
-          func_stop(e)
-          return
-
-        # Updates the state
-        self.logged_blankline = False # Now it'll skip a line next time
-        if returned_value == 0:
-          func_ok()
-        else:
-          func_err()
+    # Force a first event
+    print(FG_CYAN + "*** First call ***".center(TERMINAL_WIDTH) + FG_RESET)
+    run_subprocess()
 
     # Starts the watchdog observer
-    self._observer = Observer()
-    def p(x): print(x, type(x))
-    self._observer.schedule(DoseSomethingChangedEventHandler(),
-                            path=self.directory.encode("utf-8"),
-                            recursive=True)
-    DoseSomethingChangedEventHandler().on_any_event()
-    self._observer.start()
+    from .watcher import watcher
+    self._watcher = watcher(path=self.directory.encode("utf-8"),
+                            selector=selector, handler=watchdog_handler)
+    self._watcher.__enter__() # Returns a started watchdog.observers.Observer
     self._watching = True
 
   def stop(self):
     if self.watching:
-      self._observer.stop()
-      self._observer.join()
+      self._watcher.__exit__(None, None, None)
+      self._runner.kill()
       self._watching = False
 
 
