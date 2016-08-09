@@ -4,6 +4,11 @@ Dose change log
 v1.1.0
 ------
 
+* New test job runner with realtime standard output/error streams.
+  Each output/error byte is now printed as soon as possible, instead
+  of waiting the process to finish. The sys.stderr is now written in
+  red by using the ANSI escape codes for printing colored output.
+
 * New external configuration file for loading/saving the aesthetic GUI
   state (window position, size, opacity and flip flag). The config is
   stored as a JSON file named ``.dose.conf``. Thanks Samuel Grigolato.

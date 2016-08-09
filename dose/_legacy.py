@@ -23,7 +23,6 @@ from __future__ import division, print_function, unicode_literals
 import wx, os, time, json, threading
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from subprocess import Popen, PIPE
 from datetime import datetime
 from fnmatch import fnmatch
 from functools import wraps
@@ -452,30 +451,16 @@ class DoseWatcher(object):
                     )
 
         # Subprocess calling
+        from .runner import runner
         try:
-          process = Popen(self.call_string,
-                          stdout=PIPE, stderr=PIPE, shell=True)
-          out, err = process.communicate()
-          returned_value = process.wait()
+          with runner(self.call_string) as process:
+            returned_value = process.wait()
         except Exception, e:
           self.stop() # Watching no more
           self.printer("Error while calling".center(TERMINAL_WIDTH))
           self.printer("=" * TERMINAL_WIDTH)
           func_stop(e)
           return
-
-        # Get the data from the process
-        for data, name in [(out, "Output data"), (err, "Error data")]:
-          if len(data) > 0:
-            self.printer(name.center(TERMINAL_WIDTH))
-            self.printer("=" * TERMINAL_WIDTH)
-            self.printer(data)
-            self.printer("=" * TERMINAL_WIDTH)
-
-        # Informative message when there's no output data
-        if (len(out) == 0) and (len(err) == 0):
-          self.printer("No data".center(TERMINAL_WIDTH))
-          self.printer("=" * TERMINAL_WIDTH)
 
         # Updates the state
         self.logged_blankline = False # Now it'll skip a line next time
