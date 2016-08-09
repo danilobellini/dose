@@ -1,60 +1,76 @@
 Dose
 ====
 
-.. image:: https://pypip.in/d/dose/badge.png
-  :target: https://pypi.python.org/pypi/dose/
-.. image:: https://pypip.in/v/dose/badge.png
-  :target: https://pypi.python.org/pypi/dose/
-
 .. summary
 
-An automated semaphore GUI showing the state in
-test driven development (TDD), mainly written for dojos.
+An automated traffic light/signal/semaphore GUI showing the state
+during test driven development (TDD), mainly written for coding dojos.
 
 .. summary end
 
-Directory and watching
-----------------------
 
-**Dose** watches one directory for any kind of change
-new file, file modified, file removed, subdirectory renamed,
-etc., including its subdirectories, by using the Python
-watchdog package. For example, changes on files ending on
-'.pyc' and '.pyo' are neglect by default, as well as git
-internals, but these skip patterns are *customizable*.
+What does it do?
+----------------
+
+Runs a test command when some file is modified, showing its result in
+a GUI.
+
+
+Example
+-------
+
+Try ``dose tox`` instead of ``tox`` and have fun. Or anything else
+instead of ``tox``.
+
 
 What happens when something changes?
 ------------------------------------
 
-A *customized* subprocess is called, all its output/error
-data is left on the shell used to call Dose, and its return
-value is stored. If the value is zero, the semaphore turns
-green, else it it turns red. It stays yellow while waiting
-the subprocess to finish.
+A custom test command spawn a subprocess, and its output/error data
+appear in the shell used to call Dose. If the process returned value
+is zero, dose turns green, else it it turns red. It stays yellow while
+waiting for the subprocess to finish.
 
-Is it easy to use or should I spend hours to set it up?
--------------------------------------------------------
 
-The default directory path to watch is the one used to call
-Dose. There's no default calling string, but 'nosetests' and
-'py.test' would be hints for Python developers. It should
-work even with other languages TDD tools. To be fast, just
-open Dose and double click on it, there's no need to lose
-time with settings.
+What does it watch?
+-------------------
 
-And the GUI?
+Dose watches recursively the a working directory (by default, the
+current directory) for file modifications, using the watchdog package
+for that. You can configure a ignore pattern to avoid undesired
+detections.
+
+
+Requirements
 ------------
 
-The GUI toolkit used in this project is wxPython. You can
-move the semaphore by dragging it around. Doing so with
-Ctrl pressed would resize it. With Shift you change its
-transparency (not available on Linux, for now). The
-semaphore window always stays on top. A right click would
-show all options available.
+- wxPython 2.8 or 3.0 (classic)
+- watchdog
+
+You should install the ``wxpython`` or ``wxgtk`` packages from your
+Linux distribution, or get the Windows binary packages directly from
+https://www.wxpython.org
+
+
+Installation
+------------
+
+``pip install dose``
+
+
+GUI Controls
+------------
+
+- *Dragging*\ : Move
+- *Dragging holding Ctrl*\ : Resize
+- *Dragging holding Shift*\ : Controls th transparency
+- *Double click*\ : start or stop the watcher (can kill the test job)
+
+A right click would show more options.
+
+Please see the CHANGES.rst file for more information.
+
 
 ----
 
-Copyright (C) 2012 Danilo de Jesus da Silva Bellini
-- danilo [dot] bellini [at] gmail [dot] com
-
-License is GPLv3. See COPYING.txt for more details.
+Copyright (C) 2012-2016 Danilo de Jesus da Silva Bellini
