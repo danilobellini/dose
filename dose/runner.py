@@ -50,10 +50,13 @@ def runner(test_command):
 
 class RunnerThreadCallback(threading.Thread):
 
-    def __init__(self, test_command, end_callback, exc_callback):
+    def __init__(self, test_command, before=None, after=None, exception=None):
+        def do_nothing(result=None): # Should have a default value to be used
+            pass                     # as a valid self.before
         self.test_command = test_command
-        self.end_callback = end_callback
-        self.exc_callback = exc_callback
+        self.before = do_nothing if before is None else before
+        self.after = do_nothing if after is None else after
+        self.exception = do_nothing if exception is None else exception
         self.killed = False
         super(RunnerThreadCallback, self).__init__()
 
@@ -77,15 +80,16 @@ class RunnerThreadCallback(threading.Thread):
         try:
             time.sleep(PRE_SPAWN_DELAY) # Avoids unrequired spawning
             if not self.killed:
+                self.before()
                 with runner(self.test_command) as self.process:
                     self.process.wait()
         except Exception as exc:
-            self.exc_callback(exc)
+            self.exception(exc)
         else:
             if self.spawned:
-                self.end_callback(self.process.returncode)
+                self.after(self.process.returncode)
             else:
-                self.end_callback(None)
+                self.after(None)
 
 
 if __name__ == "__main__":

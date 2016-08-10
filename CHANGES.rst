@@ -5,8 +5,11 @@ v1.1.1
 ------
 
 * Spawns only a single test job subprocess when multiple files are
-  modified at once by aborting the triggered test job before its
-  ``subprocess.Popen`` object is created.
+  modified at once.
+
+* More compact logging, without information about the repeated/cyclic
+  file modification detection, and printing timestamps only for a
+  spawned test job.
 
 
 v1.1.0

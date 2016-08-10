@@ -397,9 +397,6 @@ class DoseWatcher(object):
         return False
       path = os.path.relpath(evt.src_path, self.directory)
       if path in self._last_fnames: # Detected a "killing cycle"
-        print(FG_MAGENTA + "*** Cycle detected! ***".center(TERMINAL_WIDTH)
-                         + FG_RESET)
-        print_header(evt, color=FG_MAGENTA)
         return False
       for pattern in self.skip_pattern.split(";"):
         if fnmatch(path, pattern.strip()):
@@ -410,9 +407,7 @@ class DoseWatcher(object):
       if self._runner.killed:
         if self._runner.spawned:
           msg = "*** Killed! ***"
-        else:
-          msg = "*** Aborted! ***"
-        print(FG_MAGENTA + msg.center(TERMINAL_WIDTH) + FG_RESET)
+          print(FG_MAGENTA + msg.center(TERMINAL_WIDTH) + FG_RESET)
       elif result == 0:
         func_ok()
       else:
@@ -425,8 +420,8 @@ class DoseWatcher(object):
       print("=" * TERMINAL_WIDTH + FG_RESET)
       func_stop(exc)
 
-    def print_header(evt, color=FG_CYAN):
-      print(color + " ".join(["***",
+    def print_header(evt):
+      print(FG_CYAN + " ".join(["***",
         "Directory" if evt.is_directory else "File",
         evt.event_type + ":",
         os.path.relpath(evt.src_path, self.directory).decode("utf-8"),
@@ -440,11 +435,11 @@ class DoseWatcher(object):
       print("=" * TERMINAL_WIDTH + FG_RESET)
 
     def run_subprocess():
-      print_timestamp()
       func_wait() # State changed: "waiting" for a subprocess to finish
       self._runner = RunnerThreadCallback(test_command=self.call_string,
-                                    end_callback=end_callback,
-                                    exc_callback=exc_callback)
+                                          before=print_timestamp,
+                                          after=end_callback,
+                                          exception=exc_callback)
       self._runner.start()
 
     def watchdog_handler(evt):
