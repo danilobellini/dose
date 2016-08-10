@@ -407,13 +407,16 @@ class DoseWatcher(object):
       return True
 
     def end_callback(result):
-      if result == 0:
+      if self._runner.killed:
+        if self._runner.spawned:
+          msg = "*** Killed! ***"
+        else:
+          msg = "*** Aborted! ***"
+        print(FG_MAGENTA + msg.center(TERMINAL_WIDTH) + FG_RESET)
+      elif result == 0:
         func_ok()
-      elif result > 0:
+      else:
         func_err()
-      else: # SIGTERM or SIGKILL
-        print(FG_MAGENTA + "*** Killed! ***".center(TERMINAL_WIDTH)
-                         + FG_RESET)
 
     def exc_callback(exc):
       self.stop() # Watching no more

@@ -1,6 +1,14 @@
 Dose change log
 ===============
 
+v1.1.1
+------
+
+* Spawns only a single test job subprocess when multiple files are
+  modified at once by aborting the triggered test job before its
+  ``subprocess.Popen`` object is created.
+
+
 v1.1.0
 ------
 
