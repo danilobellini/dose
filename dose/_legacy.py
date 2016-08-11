@@ -388,8 +388,10 @@ class DoseWatcher(object):
         print(FG_MAGENTA + msg.center(TERMINAL_WIDTH) + FG_RESET)
     elif result == 0:
       self.on_green()
+      self._last_fnames = []
     else:
       self.on_red()
+      self._last_fnames = []
 
   def _exc_callback(self, exc):
     from .runner import FG_RED, FG_RESET
@@ -405,15 +407,48 @@ class DoseWatcher(object):
   def _emit_exc(self, result):
     wx.CallAfter(self._exc_callback, result)
 
+  def _print_timestamp(self):
+    from .runner import FG_YELLOW, FG_RESET
+    timestamp = datetime.now()
+    print(FG_YELLOW + "=" * TERMINAL_WIDTH)
+    print("[Dose] {0}".format(timestamp).center(TERMINAL_WIDTH))
+    print("=" * TERMINAL_WIDTH + FG_RESET)
+
+  def _print_header(self, evt=None):
+    from .runner import FG_CYAN, FG_RESET
+    if evt is None:
+      print(FG_CYAN + "*** First call ***".center(TERMINAL_WIDTH) + FG_RESET)
+    else:
+      print(FG_CYAN + " ".join(["***",
+        "Directory" if evt.is_directory else "File",
+        evt.event_type + ":",
+        os.path.relpath(evt.src_path, self.directory).decode("utf-8"),
+        "***"
+      ]).center(TERMINAL_WIDTH) + FG_RESET)
+
+  def _run_subprocess(self):
+    if self.watching:
+      from .runner import RunnerThreadCallback
+      self._print_header(self._evts.pop())
+      if not self._evts: # Multiple events at once, only the last should run
+        self.on_yellow() # State changed: "waiting" for a subprocess to finish
+        self._runner = RunnerThreadCallback(test_command=self.call_string,
+                                            before=self._print_timestamp,
+                                            after=self._emit_end,
+                                            exception=self._emit_exc)
+        self._runner.start()
+
+  def _watchdog_handler(self, evt):
+    self._last_fnames.append(os.path.relpath(evt.src_path, self.directory))
+    self._runner.kill() # Triggers end/exception callback
+    self._evts.append(evt)
+    wx.CallAfter(self._run_subprocess) # After the runner callbacks
+
   def start(self):
     """Starts watching the path and running the test jobs."""
     assert not self.watching
 
-    from .runner import FG_YELLOW, FG_CYAN, FG_RESET, RunnerThreadCallback
-
     def selector(evt):
-      if not self._runner.is_alive():
-        self._last_fnames = []
       if evt.event_type != "modified" or evt.is_directory:
         return False
       path = os.path.relpath(evt.src_path, self.directory)
@@ -424,45 +459,20 @@ class DoseWatcher(object):
           return False
       return True
 
-    def print_header(evt):
-      print(FG_CYAN + " ".join(["***",
-        "Directory" if evt.is_directory else "File",
-        evt.event_type + ":",
-        os.path.relpath(evt.src_path, self.directory).decode("utf-8"),
-        "***"
-      ]).center(TERMINAL_WIDTH) + FG_RESET)
-
-    def print_timestamp():
-      timestamp = datetime.now()
-      print(FG_YELLOW + "=" * TERMINAL_WIDTH)
-      print("[Dose] {0}".format(timestamp).center(TERMINAL_WIDTH))
-      print("=" * TERMINAL_WIDTH + FG_RESET)
-
-    def run_subprocess():
-      self.on_yellow() # State changed: "waiting" for a subprocess to finish
-      self._runner = RunnerThreadCallback(test_command=self.call_string,
-                                          before=print_timestamp,
-                                          after=self._emit_end,
-                                          exception=self._emit_exc)
-      self._runner.start()
-
     def watchdog_handler(evt):
-      self._last_fnames.append(os.path.relpath(evt.src_path, self.directory))
-      self._runner.kill()
-      print_header(evt)
-      run_subprocess()
+      wx.CallAfter(self._watchdog_handler, evt)
 
     # Force a first event
+    self._watching = True
     self._last_fnames = []
-    print(FG_CYAN + "*** First call ***".center(TERMINAL_WIDTH) + FG_RESET)
-    run_subprocess()
+    self._evts = [None]
+    self._run_subprocess()
 
     # Starts the watchdog observer
     from .watcher import watcher
     self._watcher = watcher(path=self.directory.encode("utf-8"),
                             selector=selector, handler=watchdog_handler)
     self._watcher.__enter__() # Returns a started watchdog.observers.Observer
-    self._watching = True
 
   def stop(self):
     if self.watching:
