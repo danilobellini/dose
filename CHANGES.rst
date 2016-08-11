@@ -11,6 +11,13 @@ v1.1.1
   file modification detection, and printing timestamps only for a
   spawned test job.
 
+* Bug fix: some calls were replaced by event messages to let the main
+  window be refreshed by the main thread (thread-safe) instead of a
+  test job runner thread. That refresh happens when the dose state
+  updates to green/red and when the watcher stops due to an exception.
+  Updating the GUI from outside the wxPython event loop (main thread)
+  can cause a segmentation fault.
+
 
 v1.1.0
 ------

@@ -380,15 +380,36 @@ class DoseWatcher(object):
   def has_call_string(self):
     return len(self.call_string.strip()) > 0
 
-  def start(self, func_err, func_wait, func_ok, func_stop):
-    """
-    Starts watching. The three args are loggers or aesthetical functions to be
-    called when the state changes (e.g., there's something being handled).
-    """
+  def _end_callback(self, result):
+    if self._runner.killed:
+      if self._runner.spawned:
+        from .runner import FG_MAGENTA, FG_RESET
+        msg = "*** Killed! ***"
+        print(FG_MAGENTA + msg.center(TERMINAL_WIDTH) + FG_RESET)
+    elif result == 0:
+      self.on_green()
+    else:
+      self.on_red()
+
+  def _exc_callback(self, exc):
+    from .runner import FG_RED, FG_RESET
+    self.stop() # Watching no more
+    print(FG_RED + "=" * TERMINAL_WIDTH)
+    print("Error while calling".center(TERMINAL_WIDTH))
+    print("=" * TERMINAL_WIDTH + FG_RESET)
+    self.on_stop(exc)
+
+  def _emit_end(self, result):
+    wx.CallAfter(self._end_callback, result)
+
+  def _emit_exc(self, result):
+    wx.CallAfter(self._exc_callback, result)
+
+  def start(self):
+    """Starts watching the path and running the test jobs."""
     assert not self.watching
 
-    from .runner import (FG_RED, FG_YELLOW, FG_MAGENTA, FG_CYAN, FG_RESET,
-                         RunnerThreadCallback)
+    from .runner import FG_YELLOW, FG_CYAN, FG_RESET, RunnerThreadCallback
 
     def selector(evt):
       if not self._runner.is_alive():
@@ -402,23 +423,6 @@ class DoseWatcher(object):
         if fnmatch(path, pattern.strip()):
           return False
       return True
-
-    def end_callback(result):
-      if self._runner.killed:
-        if self._runner.spawned:
-          msg = "*** Killed! ***"
-          print(FG_MAGENTA + msg.center(TERMINAL_WIDTH) + FG_RESET)
-      elif result == 0:
-        func_ok()
-      else:
-        func_err()
-
-    def exc_callback(exc):
-      self.stop() # Watching no more
-      print(FG_RED + "=" * TERMINAL_WIDTH)
-      print("Error while calling".center(TERMINAL_WIDTH))
-      print("=" * TERMINAL_WIDTH + FG_RESET)
-      func_stop(exc)
 
     def print_header(evt):
       print(FG_CYAN + " ".join(["***",
@@ -435,11 +439,11 @@ class DoseWatcher(object):
       print("=" * TERMINAL_WIDTH + FG_RESET)
 
     def run_subprocess():
-      func_wait() # State changed: "waiting" for a subprocess to finish
+      self.on_yellow() # State changed: "waiting" for a subprocess to finish
       self._runner = RunnerThreadCallback(test_command=self.call_string,
                                           before=print_timestamp,
-                                          after=end_callback,
-                                          exception=exc_callback)
+                                          after=self._emit_end,
+                                          exception=self._emit_exc)
       self._runner.start()
 
     def watchdog_handler(evt):
@@ -563,10 +567,7 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
       self.on_define_call_string()
 
     if self.has_call_string():
-      self.start(func_err=self.on_red,
-                 func_wait=self.on_yellow,
-                 func_ok=self.on_green,
-                 func_stop=self.on_stop)
+      self.start()
 
   def on_stop(self, evt=None):
     self.stop()
