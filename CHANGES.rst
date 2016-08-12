@@ -30,6 +30,11 @@ v1.1.1
   Updating the GUI from outside the wxPython event loop (main thread)
   can cause a segmentation fault.
 
+* Internal exceptions from the test job runner thread can't be
+  handled, but the header was updated to be more informative::
+
+    [Dose] Error while trying to run the test job
+
 
 v1.1.0
 ------

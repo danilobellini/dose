@@ -1,13 +1,6 @@
-#!/usr/bin/env python2
 """Dose GUI for TDD: test job runner."""
 import os, subprocess, threading, sys, contextlib, time
-
-# https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-FG_RED = b"\x1b[31m"
-FG_YELLOW = b"\x1b[33m"
-FG_MAGENTA = b"\x1b[35m"
-FG_CYAN = b"\x1b[36m"
-FG_RESET = b"\x1b[39m"
+from . import terminal
 
 # Durations in seconds
 POLLING_DELAY = 0.001 # Sleep duration on non-blocking polling loops
@@ -16,9 +9,10 @@ KILL_DELAY = 0.05 # Minimum duration between spawning and killing a process
 
 
 def run_stderr(process, stream, size=1):
+    formatter = terminal.fg.red
     while process.poll() is None:
-        stream.write(FG_RED + process.stderr.read(size) + FG_RESET)
-    stream.write(FG_RED + process.stderr.read() + FG_RESET)
+        stream.write(formatter(process.stderr.read(size)))
+    stream.write(formatter(process.stderr.read()))
 
 def run_stdout(process, stream, size=1):
     while process.poll() is None:
@@ -98,21 +92,3 @@ class RunnerThreadCallback(threading.Thread):
                 self.after(self.process.returncode)
             else:
                 self.after(None)
-
-
-if __name__ == "__main__":
-    # Manual test to see if the data really appears (colored) in real time
-    import time
-    with runner("python -c 'import time, itertools, sys          \n"
-                           "for i in itertools.count():          \n"
-                           "    if i % 2 == 0:                   \n"
-                           "        stream = sys.stderr          \n"
-                           "    else:                            \n"
-                           "        stream = sys.stdout          \n"
-                           '    stream.write("%g\\n" % (i / 10.))\n'
-                           "    stream.flush()                   \n"
-                           "    time.sleep(.1)'") as process:
-        time.sleep(.05)
-        for el in range(60):
-            print(FG_YELLOW + b"[%f seconds]" % (el * .3 + .05) + FG_RESET)
-            time.sleep(.3)

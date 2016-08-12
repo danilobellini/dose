@@ -25,6 +25,8 @@ from datetime import datetime
 from fnmatch import fnmatch
 from functools import wraps
 
+from . import terminal
+
 # Thresholds and other constants
 PI = 3.141592653589793
 MIN_WIDTH = 9 # Pixels
@@ -46,7 +48,6 @@ LEDS_YELLOW = (LED_OFF, LED_YELLOW, LED_OFF)
 LEDS_GREEN = (LED_OFF, LED_OFF, LED_GREEN)
 BACKGROUND_COLOR = 0x000000
 BACKGROUND_BORDER_COLOR = 0x7f7f7f7f
-TERMINAL_WIDTH = 79
 FILENAME_PATTERN_TO_IGNORE = "; ".join(["*.pyc",
                                         "*.pyo",
                                         ".git/*",
@@ -383,9 +384,7 @@ class DoseWatcher(object):
   def _end_callback(self, result):
     if self._runner.killed:
       if self._runner.spawned:
-        from .runner import FG_MAGENTA, FG_RESET
-        msg = "*** Killed! ***"
-        print(FG_MAGENTA + msg.center(TERMINAL_WIDTH) + FG_RESET)
+        terminal.clog.magenta("*** Killed! ***")
     elif result == 0:
       self.on_green()
       self._last_fnames = []
@@ -394,11 +393,10 @@ class DoseWatcher(object):
       self._last_fnames = []
 
   def _exc_callback(self, exc):
-    from .runner import FG_RED, FG_RESET
     self.stop() # Watching no more
-    print(FG_RED + "=" * TERMINAL_WIDTH)
-    print("Error while calling".center(TERMINAL_WIDTH))
-    print("=" * TERMINAL_WIDTH + FG_RESET)
+    terminal.hr.red("=")
+    terminal.clog.red("[Dose] Error while trying to run the test job")
+    terminal.hr.red("=")
     self.on_stop(exc)
 
   def _emit_end(self, result):
@@ -408,23 +406,20 @@ class DoseWatcher(object):
     wx.CallAfter(self._exc_callback, result)
 
   def _print_timestamp(self):
-    from .runner import FG_YELLOW, FG_RESET
     timestamp = datetime.now()
-    print(FG_YELLOW + "=" * TERMINAL_WIDTH)
-    print("[Dose] {0}".format(timestamp).center(TERMINAL_WIDTH))
-    print("=" * TERMINAL_WIDTH + FG_RESET)
+    terminal.hr.yellow("=")
+    terminal.clog.yellow("[Dose] {0}".format(timestamp))
+    terminal.hr.yellow("=")
 
   def _print_header(self, evt=None):
-    from .runner import FG_CYAN, FG_RESET
     if evt is None:
-      print(FG_CYAN + "*** First call ***".center(TERMINAL_WIDTH) + FG_RESET)
+      terminal.clog.cyan("*** First call ***")
     else:
-      print(FG_CYAN + " ".join(["***",
-        "Directory" if evt.is_directory else "File",
-        evt.event_type + ":",
-        os.path.relpath(evt.src_path, self.directory).decode("utf-8"),
-        "***"
-      ]).center(TERMINAL_WIDTH) + FG_RESET)
+      terminal.clog.cyan("*** {item} {event}: {path} ***".format(
+        item = "Directory" if evt.is_directory else "File",
+        event = evt.event_type,
+        path = os.path.relpath(evt.src_path, self.directory),
+      ))
 
   def _run_subprocess(self):
     if self.watching:
