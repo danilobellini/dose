@@ -351,7 +351,7 @@ class DosePopupMenu(wx.Menu):
     menu_items.extend([(None, None),
                        ("Close\tAlt+F4", hc.on_close),
                        (None, None),
-                       ("Help and about...", hc.on_help_and_about),
+                       ("About...", hc.on_about),
                       ])
 
     # Create the menu items
@@ -618,56 +618,6 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
       self.Close() # wx.Frame
     evt.Skip()
 
-  def on_help_and_about(self, evt):
-    abinfo = wx.AboutDialogInfo()
-    abinfo.Artists = abinfo.Developers = [" ".join([__author__, "-",
-                                                    __author_email__])
-                                         ]
-    abinfo.Copyright = "Copyright (C) 2012 " + __author__
-    abinfo.Description = (
-      "Automated semaphore GUI showing the state in test driven development."
-      "\n\n"
-      "Dose watches one directory for any kind of change\n"
-      "new file, file modified, file removed, subdirectory renamed,\n"
-      "etc., including its subdirectories, by using the Python\n"
-      "watchdog package. For example, changes on files ending on\n"
-      "'.pyc' and '.pyo' are neglect by default, as well as git\n"
-      "internals, but these skip patterns are *customizable*."
-      "\n\n"
-      "A *customized* subprocess is called, all its output/error\n"
-      "data is left on the shell used to call Dose, and its return\n"
-      "value is stored. If the value is zero, the semaphore turns\n"
-      "green, else it it turns red. It stays yellow while waiting\n"
-      "the subprocess to finish."
-      "\n\n"
-      "The default directory path to watch is the one used to call\n"
-      "Dose. There's no default calling string, but 'nosetests' and\n"
-      "'py.test' would be hints for Python developers. It should\n"
-      "work even with other languages TDD tools. To be fast, just\n"
-      "open Dose and double click on it, there's no need to lose\n"
-      "time with settings."
-      "\n\n"
-      "The GUI toolkit used in this project is wxPython. You can\n"
-      "move the semaphore by dragging it around. Doing so with\n"
-      "Ctrl pressed would resize it. With Shift you change its\n"
-      "transparency (not available on Linux, for now). The\n"
-      "semaphore window always stays on top. A right click would\n"
-      "show all options available."
-    )
-    abinfo.Version = __version__
-    abinfo.Name = "Dose"
-    abinfo.License = (
-      "This program is free software: you can redistribute it and/or modify\n"
-      "it under the terms of the GNU General Public License as published by\n"
-      "the Free Software Foundation, version 3 of the License."
-      "\n\n"
-      "This program is distributed in the hope that it will be useful,\n"
-      "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-      "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\n"
-      "GNU General Public License for more details."
-      "\n\n"
-      "You should have received a copy of the GNU General Public License\n"
-      "along with this program. If not, see <http://www.gnu.org/licenses/>."
-    )
-    abinfo.WebSite = __url__
-    wx.AboutBox(abinfo)
+  def on_about(self, evt):
+    from .about import about_box
+    about_box()

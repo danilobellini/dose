@@ -73,4 +73,8 @@ Please see the CHANGES.rst file for more information.
 
 ----
 
+.. copyright
+
 Copyright (C) 2012-2016 Danilo de Jesus da Silva Bellini
+
+.. copyright end

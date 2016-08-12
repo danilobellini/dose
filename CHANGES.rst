@@ -37,6 +37,12 @@ v1.1.1
   (``u"\u00e7"``, or ``b"\xc3\xa7"`` encoded in UTF-8). Now it reads
   whole characters based on the terminal encoding.
 
+* Bug fix: the "About..." was broken due to fragmentation, as the
+  metadata variables it requires were moved to another file. While
+  fixing it, the resulting about box was rebuilt to use the package
+  text files themselves instead of some hardcoded text to be
+  manually updated.
+
 * Internal exceptions from the test job runner thread can't be
   handled, but the header was updated to be more informative::
 

@@ -1,5 +1,6 @@
 """Dose GUI for TDD: colored terminal."""
 from __future__ import unicode_literals, print_function
+from .misc import attr_item_call_auto_cache
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 ANSI_FG_COLOR = {
@@ -11,20 +12,6 @@ ANSI_FG_COLOR = {
 ANSI_FG_RESET = b"\x1b[39m"
 
 TERMINAL_WIDTH = 79 # TODO: Get the actual terminal width
-
-
-def attr_item_call_auto_cache(func):
-    """
-    Decorator for a a single positional argument function to cache
-    its results and to make ``f("a") == f["a"] == f.a``.
-    """
-    return type(func.__name__.capitalize(), (dict,), {
-      "__missing__": staticmethod(func),
-      "__call__": dict.__getitem__,
-      "__getattr__": dict.__getitem__,
-      "__doc__": func.__doc__, # Class docstring can't be updated afterwards
-      "__module__": func.__module__,
-    })()
 
 
 @attr_item_call_auto_cache

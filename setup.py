@@ -15,8 +15,11 @@ metadata = {
   "long_description": dose.rest.all_but_block("summary", README),
   "license": "GPLv3",
   "packages": ["dose"],
-  "install_requires": ["watchdog>=0.6.0"], # Needs wxPython as well
+  "install_requires": ["watchdog>=0.6.0",
+                       "setuptools>=25"], # Needs wxPython as well
   "entry_points": {"console_scripts": ["dose = dose.__main__:main"]},
+  "data_files": [("share/dose", ["COPYING.txt", "README.rst",
+                                 "CONTRIBUTORS.txt", "CHANGES.rst"])],
 }
 
 metadata["classifiers"] = """
