@@ -1,5 +1,5 @@
 """Dose GUI for TDD: test job runner."""
-import os, subprocess, threading, sys, contextlib, time, codecs
+import os, subprocess, threading, sys, contextlib, time, codecs, traceback
 from . import terminal
 
 # Durations in seconds
@@ -61,6 +61,18 @@ def flush_stream_threads(process, out_formatter=None,
 
 @contextlib.contextmanager
 def runner(test_command):
+    """
+    Internal test job runner context manager.
+
+    Run the test_command in a subprocess and instantiates 2
+    FlushStreamThread, for flushing the output and error streams.
+
+    It yields the subprocess.Popen instance that was spawned to
+    run the given test command.
+
+    Leaving the context manager kills the process and joins the
+    flushing threads. Use the ``process.wait`` method to avoid that.
+    """
     process = subprocess.Popen(test_command, bufsize=0, shell=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     with flush_stream_threads(process):
@@ -72,19 +84,56 @@ def runner(test_command):
 
 
 class RunnerThreadCallback(threading.Thread):
+    """
+    Test job runner as 3 threads + 1 subprocess.
+
+    This is the main test job runner thread, the other 2 are for the
+    standard output/error flushing (one for each stream).
+
+    You can use 3 callback functions for this thread.
+
+    - before: Called just before spawning the subprocess, when it's
+              certain that it won't be aborted ("pre-killed"). This
+              callback will be called with no parameters;
+    - after: Called with the result as the only parameter just after
+             obtaining it. For aborted subprocesses, the parameter is
+             None. Killed ones depends on the operating system;
+    - exception: When an internal exception is raised in the main
+                 runner thread, this gets called with 3 positional
+                 arguments from ``sys.exc_info``: the exception type,
+                 the exception itself and the traceback.
+
+    For these callbacks, you should use thread-safe functions or some
+    event sender/emitter that would delegate the handling action to
+    other thread.
+    """
 
     def __init__(self, test_command, before=None, after=None, exception=None):
-        def do_nothing(result=None): # Should have a default value to be used
-            pass                     # as a valid self.before
         self.test_command = test_command
-        self.before = do_nothing if before is None else before
-        self.after = do_nothing if after is None else after
-        self.exception = do_nothing if exception is None else exception
+        if before is not None:
+            self.before = before
+        if after is not None:
+            self.after = after
+        if exception is not None:
+            self.exception = exception
         self.killed = False
         super(RunnerThreadCallback, self).__init__()
         self.start()
 
     def kill(self):
+        """
+        Terminate the test job.
+
+        Kill the subprocess if it was spawned, abort the spawning
+        process otherwise. This information can be collected afterwards
+        by reading the self.killed and self.spawned flags.
+
+        Also join the 3 related threads to the caller thread. This can
+        be safely called from any thread.
+
+        This method behaves as self.join() when the thread isn't alive,
+        i.e., it doesn't raise an exception.
+        """
         while self.is_alive():
             self.killed = True
             time.sleep(POLLING_DELAY) # "Was a process spawned?" polling
@@ -113,10 +162,14 @@ class RunnerThreadCallback(threading.Thread):
                 with runner(self.test_command) as self.process:
                     time.sleep(KILL_DELAY)
                     self.process.wait()
-        except Exception as exc:
-            self.exception(exc)
-        else:
-            if self.spawned:
-                self.after(self.process.returncode)
-            else:
-                self.after(None)
+            self.after(self.process.returncode if self.spawned else None)
+        except:
+            try:
+                self.exception(*sys.exc_info())
+            except:
+                RunnerThreadCallback.exception(*sys.exc_info())
+
+    # Default callbacks
+    before = staticmethod(lambda: None)
+    after = staticmethod(lambda result: None)
+    exception = staticmethod(traceback.print_exception)

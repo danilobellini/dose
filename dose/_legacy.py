@@ -392,18 +392,22 @@ class DoseWatcher(object):
       self.on_red()
       self._last_fnames = []
 
-  def _exc_callback(self, exc):
+  def _exc_callback(self, exc_type, exc_value, traceback):
+    from traceback import format_exception
     self.stop() # Watching no more
     terminal.hr.red("=")
     terminal.clog.red("[Dose] Error while trying to run the test job")
     terminal.hr.red("=")
-    self.on_stop(exc)
+    for line in format_exception(exc_type, exc_value, traceback):
+      terminal.log.magenta(line.rstrip())
+    terminal.hr.red("=")
+    self.on_stop(exc_value)
 
   def _emit_end(self, result):
     wx.CallAfter(self._end_callback, result)
 
-  def _emit_exc(self, result):
-    wx.CallAfter(self._exc_callback, result)
+  def _emit_exc(self, exc_type, exc_value, traceback):
+    wx.CallAfter(self._exc_callback, exc_type, exc_value, traceback)
 
   def _print_timestamp(self):
     timestamp = datetime.now()

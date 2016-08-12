@@ -42,6 +42,8 @@ v1.1.1
 
     [Dose] Error while trying to run the test job
 
+  And a traceback is print.
+
 
 v1.1.0
 ------
