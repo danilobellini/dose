@@ -436,7 +436,6 @@ class DoseWatcher(object):
                                             before=self._print_timestamp,
                                             after=self._emit_end,
                                             exception=self._emit_exc)
-        self._runner.start()
 
   def _watchdog_handler(self, evt):
     self._last_fnames.append(os.path.relpath(evt.src_path, self.directory))

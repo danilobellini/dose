@@ -10,8 +10,9 @@ FG_CYAN = b"\x1b[36m"
 FG_RESET = b"\x1b[39m"
 
 # Durations in seconds
-SPAWN_POLLING_DELAY = 0.001 # "Was a process spawned?" polling when killing
-PRE_SPAWN_DELAY = 0.05 # Avoids spawning some subprocesses fated to be killed
+POLLING_DELAY = 0.001 # Sleep duration on non-blocking polling loops
+PRE_SPAWN_DELAY = 0.01 # Avoids spawning some subprocesses fated to be killed
+KILL_DELAY = 0.05 # Minimum duration between spawning and killing a process
 
 
 def run_stderr(process, stream, size=1):
@@ -59,11 +60,12 @@ class RunnerThreadCallback(threading.Thread):
         self.exception = do_nothing if exception is None else exception
         self.killed = False
         super(RunnerThreadCallback, self).__init__()
+        self.start()
 
     def kill(self):
         while self.is_alive():
             self.killed = True
-            time.sleep(SPAWN_POLLING_DELAY)
+            time.sleep(POLLING_DELAY) # "Was a process spawned?" polling
             if not self.spawned:
                 continue # Either self.run returns or runner yields
             if self.process.poll() is None: # It's running
@@ -78,10 +80,16 @@ class RunnerThreadCallback(threading.Thread):
 
     def run(self):
         try:
-            time.sleep(PRE_SPAWN_DELAY) # Avoids unrequired spawning
-            if not self.killed:
+            # Waits PRE_SPAWN_DELAY, but self might get killed before that
+            start = time.time()
+            while time.time() < start + PRE_SPAWN_DELAY:
+                time.sleep(POLLING_DELAY)
+                if self.killed:
+                    break
+            else: # Avoids an unrequired spawning
                 self.before()
                 with runner(self.test_command) as self.process:
+                    time.sleep(KILL_DELAY)
                     self.process.wait()
         except Exception as exc:
             self.exception(exc)

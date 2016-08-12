@@ -4,8 +4,18 @@ Dose change log
 v1.1.1
 ------
 
-* Spawns only a single test job subprocess when multiple files are
+* Faster! Waits just 10ms before spawning, and 50ms before killing.
+  Spawns only a single test job subprocess when multiple files are
   modified at once.
+
+  That avoids new test job runners as much as possible and is faster
+  than the old procedure of spawning a runner for each modified file
+  to kill afterwards. The kill delay wasn't explicit, but it used
+  to have a 50ms polling loop querying for a spawned subprocess.
+
+  The 10ms pre-spawn delay is evaluated in a 1ms polling loop, and
+  simultaneous file modification events are joined together before
+  that. In other words, Dose can abort a test job earlier.
 
 * More compact logging, without information about the repeated/cyclic
   file modification detection, and printing timestamps only for a
