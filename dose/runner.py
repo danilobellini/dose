@@ -1,5 +1,5 @@
 """Dose GUI for TDD: test job runner."""
-import os, subprocess, threading, sys, contextlib, time
+import os, subprocess, threading, sys, contextlib, time, codecs
 from . import terminal
 
 # Durations in seconds
@@ -8,39 +8,67 @@ PRE_SPAWN_DELAY = 0.01 # Avoids spawning some subprocesses fated to be killed
 KILL_DELAY = 0.05 # Minimum duration between spawning and killing a process
 
 
-def run_stderr(process, stream, size=1):
-    formatter = terminal.fg.red
-    while process.poll() is None:
-        stream.write(formatter(process.stderr.read(size)))
-    stream.write(formatter(process.stderr.read()))
+class FlushStreamThread(threading.Thread):
+    """
+    Thread for synchronizing/flushing a given process and the single
+    standard stream name ("stdout" or "stderr"). The process
+    output/error stream can be processed by the given formatter
+    function before writting to the respective ``sys`` stream.
+    """
+    def __init__(self, process, stream_name, formatter=None, size=1):
+        super(FlushStreamThread, self).__init__(target=self, kwargs=dict(
+          process = process,
+          stream_in = getattr(process, stream_name),
+          stream_out = getattr(sys, stream_name),
+          formatter = formatter,
+          size = size,
+        ))
 
-def run_stdout(process, stream, size=1):
-    while process.poll() is None:
-        stream.write(process.stdout.read(size))
-    stream.write(process.stdout.read())
+    # As "run" can't be used with parameters, let's "call" a thread
+    def __call__(self, process, stream_in, stream_out, formatter, size):
+        SR = codecs.getreader(stream_out.encoding)
+        reader = SR(stream_in, errors="ignore")
+        if formatter is None:
+            while process.poll() is None:
+                stream_out.write(reader.read(size))
+            stream_out.write(reader.read()) # Remaining data
+        else:
+            while process.poll() is None:
+                stream_out.write(formatter(reader.read(size)))
+            stream_out.write(formatter(reader.read())) # Remaining data
 
 
 @contextlib.contextmanager
-def flush_stream_thread(sname, **kwargs):
-    kwargs["stream"], target = {"stdout": (sys.stdout, run_stdout),
-                                "stderr": (sys.stderr, run_stderr)}[sname]
-    th = threading.Thread(target=target, kwargs=kwargs)
-    th.start()
-    yield th
-    th.join()
+def flush_stream_threads(process, out_formatter=None,
+                                  err_formatter=terminal.fg.red, size=1):
+    """
+    Context manager that creates 2 threads, one for each standard
+    stream (stdout/stderr), updating in realtime the piped data.
+    The formatters are callables that receives manipulates the data,
+    e.g. coloring it before writing to a ``sys`` stream. See
+    ``FlushStreamThread`` for more information.
+    """
+    out = FlushStreamThread(process=process, stream_name="stdout",
+                            formatter=out_formatter, size=size)
+    err = FlushStreamThread(process=process, stream_name="stderr",
+                            formatter=err_formatter, size=size)
+    out.start()
+    err.start()
+    yield out, err
+    out.join()
+    err.join()
 
 
 @contextlib.contextmanager
 def runner(test_command):
     process = subprocess.Popen(test_command, bufsize=0, shell=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    with flush_stream_thread("stdout", process=process):
-        with flush_stream_thread("stderr", process=process):
-            try:
-                yield process
-            finally:
-                if process.poll() is None:
-                    process.terminate()
+    with flush_stream_threads(process):
+        try:
+            yield process
+        finally:
+            if process.poll() is None:
+                process.terminate()
 
 
 class RunnerThreadCallback(threading.Thread):

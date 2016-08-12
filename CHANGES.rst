@@ -30,6 +30,13 @@ v1.1.1
   Updating the GUI from outside the wxPython event loop (main thread)
   can cause a segmentation fault.
 
+* Bug fix: multi-byte unicode characters have been being written to
+  the standard error with an ANSI escape code in between. For example,
+  it was printing ``Ã§Ã§`` (``u"\u00c3\u00a7"``, or
+  ``b"\xc3\x83\xc2\xa7"`` encoded in UTF-8), instead of ``çç``
+  (``u"\u00e7"``, or ``b"\xc3\xa7"`` encoded in UTF-8). Now it reads
+  whole characters based on the terminal encoding.
+
 * Internal exceptions from the test job runner thread can't be
   handled, but the header was updated to be more informative::
 
