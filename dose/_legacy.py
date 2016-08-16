@@ -447,7 +447,7 @@ class DoseWatcher(object):
     assert not self.watching
 
     def selector(evt):
-      if evt.event_type != "modified" or evt.is_directory:
+      if evt.event_type == "deleted" or evt.is_directory:
         return False
       path = os.path.relpath(evt.src_path, self.directory)
       if path in self._last_fnames: # Detected a "killing cycle"

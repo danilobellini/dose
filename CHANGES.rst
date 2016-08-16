@@ -21,6 +21,10 @@ v1.1.1
   file modification detection, and printing timestamps only for a
   spawned test job.
 
+* Revert file creation to trigger a test job. This was required on
+  Mac OS X as some applications (e.g. vim) delete and create a file
+  instead of modifying it, w.r.t. the watchdog events.
+
 * Bug fix: some calls were replaced by event messages to let the main
   window be refreshed by the main thread (thread-safe) instead of a
   test job runner thread or a watcher thread.

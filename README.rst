@@ -48,8 +48,15 @@ Requirements
 - watchdog
 
 You should install the ``wxpython`` or ``wxgtk`` packages from your
-Linux distribution, or get the Windows binary packages directly from
-https://www.wxpython.org
+Linux distribution, or get the Windows / Mac OS X binary packages
+directly from the `wxPython official site`_\ . On Mac OS X 10.11
+(El Capitan), `this blog post might help`_\ .
+
+.. _`wxPython official site`:
+  https://www.wxpython.org
+
+.. _`this blog post might help`:
+  http://davixx.fr/blog/2016/01/25/wxpython-on-os-x-el-capitan/
 
 
 Installation
@@ -62,7 +69,7 @@ GUI Controls
 ------------
 
 - *Dragging*\ : Move
-- *Dragging holding Ctrl*\ : Resize
+- *Dragging holding Ctrl/⌘*\ : Resize
 - *Dragging holding Shift*\ : Controls th transparency
 - *Double click*\ : start or stop the watcher (can kill the test job)
 
