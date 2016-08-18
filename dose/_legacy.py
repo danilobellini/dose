@@ -432,6 +432,7 @@ class DoseWatcher(object):
       if not self._evts: # Multiple events at once, only the last should run
         self.on_yellow() # State changed: "waiting" for a subprocess to finish
         self._runner = RunnerThreadCallback(test_command=self.call_string,
+                                            work_dir=self.directory,
                                             before=self._print_timestamp,
                                             after=self._emit_end,
                                             exception=self._emit_exc)

@@ -60,7 +60,7 @@ def flush_stream_threads(process, out_formatter=None,
 
 
 @contextlib.contextmanager
-def runner(test_command):
+def runner(test_command, work_dir=None):
     """
     Internal test job runner context manager.
 
@@ -68,12 +68,13 @@ def runner(test_command):
     FlushStreamThread, for flushing the output and error streams.
 
     It yields the subprocess.Popen instance that was spawned to
-    run the given test command.
+    run the given test command in the given working directory.
 
     Leaving the context manager kills the process and joins the
     flushing threads. Use the ``process.wait`` method to avoid that.
     """
     process = subprocess.Popen(test_command, bufsize=0, shell=True,
+                               cwd=work_dir,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     with flush_stream_threads(process):
         try:
@@ -108,8 +109,10 @@ class RunnerThreadCallback(threading.Thread):
     other thread.
     """
 
-    def __init__(self, test_command, before=None, after=None, exception=None):
+    def __init__(self, test_command, work_dir=None,
+                 before=None, after=None, exception=None):
         self.test_command = test_command
+        self.work_dir = work_dir
         if before is not None:
             self.before = before
         if after is not None:
@@ -149,6 +152,13 @@ class RunnerThreadCallback(threading.Thread):
     def spawned(self):
         return hasattr(self, "process")
 
+    @property
+    def runner_kwargs(self):
+        return {
+          "test_command" : self.test_command,
+          "work_dir": self.work_dir,
+        }
+
     def run(self):
         try:
             # Waits PRE_SPAWN_DELAY, but self might get killed before that
@@ -159,7 +169,7 @@ class RunnerThreadCallback(threading.Thread):
                     break
             else: # Avoids an unrequired spawning
                 self.before()
-                with runner(self.test_command) as self.process:
+                with runner(**self.runner_kwargs) as self.process:
                     time.sleep(KILL_DELAY)
                     self.process.wait()
             self.after(self.process.returncode if self.spawned else None)

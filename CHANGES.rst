@@ -47,6 +47,10 @@ v1.1.1
   text files themselves instead of some hardcoded text to be
   manually updated.
 
+* Bug fix: use the watching directory as the working directory for
+  running the test command instead of the current working directory
+  whereby Dose was called.
+
 * Internal exceptions from the test job runner thread can't be
   handled, but the header was updated to be more informative::
 
