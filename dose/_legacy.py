@@ -346,7 +346,7 @@ class DosePopupMenu(wx.Menu):
                          (None, None),
                          ("Directory to watch...", hc.on_directory_to_watch),
                          ("Define call string...", hc.on_define_call_string),
-                         ("Skip pattern...", hc.on_skip_pattern),
+                         ("Ignore pattern...", hc.on_skip_pattern),
                         ])
     menu_items.extend([(None, None),
                        ("Close\tAlt+F4", hc.on_close),
@@ -448,7 +448,7 @@ class DoseWatcher(object):
     assert not self.watching
 
     def selector(evt):
-      if evt.event_type == "deleted" or evt.is_directory:
+      if evt.is_directory:
         return False
       path = os.path.relpath(evt.src_path, self.directory)
       if path in self._last_fnames: # Detected a "killing cycle"

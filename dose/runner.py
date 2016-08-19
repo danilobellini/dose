@@ -65,7 +65,8 @@ def runner(test_command, work_dir=None):
     Internal test job runner context manager.
 
     Run the test_command in a subprocess and instantiates 2
-    FlushStreamThread, for flushing the output and error streams.
+    FlushStreamThread, one for each standard stream (output/stdout
+    and error/stderr).
 
     It yields the subprocess.Popen instance that was spawned to
     run the given test command in the given working directory.
