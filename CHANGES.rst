@@ -1,6 +1,14 @@
 Dose change log
 ===============
 
+Development
+-----------
+
+* Use the default accelerator for closing a window in the operating
+  system (e.g. Alt+F4). Also, the accelerators were removed from the
+  menu, avoiding a warning for the invalid "Double Click" accelerator.
+
+
 v1.1.1
 ------
 

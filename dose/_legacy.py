@@ -107,6 +107,7 @@ class DoseGraphicalSemaphore(wx.Frame):
     frame_style = (wx.FRAME_SHAPED |     # Allows wx.SetShape
                    wx.FRAME_NO_TASKBAR |
                    wx.STAY_ON_TOP |
+                   wx.CLOSE_BOX | # Required on Linux for closing with Alt+F4
                    wx.NO_BORDER
                   )
     super(DoseGraphicalSemaphore, self).__init__(parent, style=frame_style,
@@ -335,21 +336,21 @@ class DosePopupMenu(wx.Menu):
                   (None, None),
                  ]
     if watching:
-      menu_items.extend([("Stop!\tDouble Click", hc.on_stop),
+      menu_items.extend([("Stop!", hc.on_stop),
                          (None, None),
                          ("Red", hc.on_red),
                          ("Yellow", hc.on_yellow),
                          ("Green", hc.on_green),
                         ])
     else:
-      menu_items.extend([("Start!\tDouble Click", hc.on_start),
+      menu_items.extend([("Start!", hc.on_start),
                          (None, None),
                          ("Directory to watch...", hc.on_directory_to_watch),
                          ("Define call string...", hc.on_define_call_string),
                          ("Ignore pattern...", hc.on_skip_pattern),
                         ])
     menu_items.extend([(None, None),
-                       ("Close\tAlt+F4", hc.on_close),
+                       ("Close", hc.on_close),
                        (None, None),
                        ("About...", hc.on_about),
                       ])
@@ -612,7 +613,7 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
 
   def on_close(self, evt):
     """
-    Pop-up menu and "Alt+F4" closing event
+    Pop-up menu and wx.EVT_CLOSE closing event
     """
     self.stop() # DoseWatcher
     if evt.EventObject is not self: # Avoid deadlocks
