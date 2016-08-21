@@ -1,21 +1,9 @@
 """Dose GUI for TDD: about dialog box."""
-import wx, itertools
-from pkg_resources import Requirement, resource_string
-from . import __version__, __author__, __author_email__, __url__
+import wx
+from . import __version__, __url__
 from .rest import single_line_block
 from .misc import snake2ucamel
-
-
-def get_shared(fname):
-    """
-    Using the setuptools package resources, gets the string data from a
-    text file that was packaged as a data file in the distribution.
-    """
-    return resource_string(Requirement("dose"), "share/dose/" + fname)
-
-
-README = get_shared("README.rst").splitlines()
-CONTRIBUTORS = get_shared("CONTRIBUTORS.txt").splitlines()
+from .shared import README, CONTRIBUTORS, LICENSE
 
 
 metadata = {
@@ -24,7 +12,7 @@ metadata = {
   "description": single_line_block("summary", README),
   "version": __version__,
   "name": "Dose",
-  "license": get_shared("COPYING.txt").replace("\r", ""),
+  "license": LICENSE,
   "web_site": __url__,
 }
 

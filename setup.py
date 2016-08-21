@@ -1,9 +1,29 @@
 #!/usr/bin/env python2
 """Dose GUI for TDD: setup script."""
-import os, setuptools, dose, dose.rest
+import os, setuptools, dose, dose.rest, distutils.filelist
 
-with open(os.path.join(os.path.dirname(__file__), "README.rst"), "r") as f:
-    README = f.read().splitlines()
+SDIST_PATH = os.path.dirname(__file__) # That's also sys.path[0]
+if SDIST_PATH:           # The setuptools.setup function requires this to
+    os.chdir(SDIST_PATH) # work properly when called from otherwhere
+
+
+def read_plain_text(fname):
+    """Reads a file as a list of strings."""
+    with open(os.path.join(fname), "r") as f:
+        return f.read().splitlines()
+
+
+def parse_manifest(template_lines):
+    """List of file names included by the MANIFEST.in template lines."""
+    manifest_files = distutils.filelist.FileList()
+    for line in template_lines:
+        manifest_files.process_template_line(line)
+    return manifest_files.files
+
+
+README = read_plain_text("README.rst")
+SHARED_FILES = parse_manifest(read_plain_text("MANIFEST.in"))
+
 
 metadata = {
   "name": "dose",
@@ -14,12 +34,11 @@ metadata = {
   "description": dose.rest.single_line_block("summary", README),
   "long_description": dose.rest.all_but_block("summary", README),
   "license": "GPLv3",
-  "packages": ["dose"],
+  "packages": setuptools.find_packages(),
   "install_requires": ["watchdog>=0.6.0",
                        "setuptools>=25"], # Needs wxPython as well
   "entry_points": {"console_scripts": ["dose = dose.__main__:main"]},
-  "data_files": [("share/dose", ["COPYING.txt", "README.rst",
-                                 "CONTRIBUTORS.txt", "CHANGES.rst"])],
+  "data_files": [("share/dose", SHARED_FILES)],
 }
 
 metadata["classifiers"] = """

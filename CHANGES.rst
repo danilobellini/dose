@@ -8,6 +8,9 @@ Development
   system (e.g. Alt+F4). Also, the accelerators were removed from the
   menu, avoiding a warning for the invalid "Double Click" accelerator.
 
+* More abstract setup.py that installs from anywhere and gets the
+  shared files from the ``MANIFEST.in``.
+
 
 v1.1.1
 ------

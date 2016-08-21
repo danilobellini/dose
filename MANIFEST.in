@@ -1,1 +1,1 @@
-include MANIFEST.in *.txt *.rst
+include *.txt *.rst
