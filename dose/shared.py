@@ -12,5 +12,6 @@ def get_shared(fname):
 
 
 README = get_shared("README.rst").splitlines()
+CHANGES = get_shared("CHANGES.rst").splitlines()
 CONTRIBUTORS = get_shared("CONTRIBUTORS.txt").splitlines()
 LICENSE = get_shared("COPYING.txt").replace("\r", "")

@@ -36,6 +36,7 @@ metadata = {
   "license": "GPLv3",
   "packages": setuptools.find_packages(),
   "install_requires": ["watchdog>=0.6.0",
+                       "docutils>=0.12",
                        "setuptools>=25"], # Needs wxPython as well
   "entry_points": {"console_scripts": ["dose = dose.__main__:main"]},
   "data_files": [("share/dose", SHARED_FILES)],

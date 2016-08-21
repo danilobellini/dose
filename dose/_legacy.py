@@ -353,6 +353,7 @@ class DosePopupMenu(wx.Menu):
                        ("Close", hc.on_close),
                        (None, None),
                        ("About...", hc.on_about),
+                       ("Help...", hc.on_help),
                       ])
 
     # Create the menu items
@@ -623,3 +624,7 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
   def on_about(self, evt):
     from .about import about_box
     about_box()
+
+  def on_help(self, evt):
+    from .help import help_box
+    help_box()

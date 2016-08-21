@@ -4,6 +4,16 @@ Dose change log
 Development
 -----------
 
+* New "Help..." popup menu item that displays a new window containing
+  most of the ``README.rst`` and ``CHANGES.rst`` contents. Clicking on
+  a link opens it in the default web browser.
+
+  This feature requires docutils_ for converting the reStructuredText
+  data to HTML, therefore it's a new Dose dependency. There's no extra
+  dependency for rendering the resulting HTML, wxPython provides
+  the ``HtmlWindow`` widget that renders an HTML subset, and it's
+  enough for this task.
+
 * Use the default accelerator for closing a window in the operating
   system (e.g. Alt+F4). Also, the accelerators were removed from the
   menu, avoiding a warning for the invalid "Double Click" accelerator.
@@ -296,6 +306,7 @@ alpha-2012.10.02
   unicode.
 
 
+.. _docutils: https://pypi.python.org/pypi/docutils
 .. _setuptools: https://pypi.python.org/pypi/setuptools
 .. _distutils: https://docs.python.org/2/library/distutils.html
 .. _2d14857: https://github.com/gorakhargosh/watchdog/commit/2d14857c

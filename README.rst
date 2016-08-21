@@ -79,6 +79,7 @@ Requirements
 
 - wxPython 2.8 or 3.0 (classic)
 - watchdog
+- docutils
 
 You should install the ``wxpython`` or ``wxgtk`` packages from your
 Linux distribution, or get the Windows / Mac OS X binary packages
