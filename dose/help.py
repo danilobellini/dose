@@ -2,6 +2,7 @@
 import wx, wx.html, docutils.core
 from .rest import all_but_block
 from .shared import README, CHANGES
+from .misc import ucamel_method
 
 
 help_data = {}
@@ -24,8 +25,11 @@ class HtmlHelp(wx.html.HtmlWindow):
     Help widget object that renders the HTML content and opens the
     default browser when a link is clicked.
     """
-    def OnLinkClicked(self, link):
-        wx.LaunchDefaultBrowser(link.GetHref())
+    @ucamel_method
+    def on_link_clicked(self, link):
+        wx.LaunchDefaultBrowser(link.Href)
+
+    page = property(fset = lambda self, value: self.SetPage(value))
 
 
 def help_box():
@@ -34,6 +38,6 @@ def help_box():
     dialog_box = wx.Dialog(None, wx.ID_ANY, "Dose Help",
                            style=style, size=(620, 450))
     html_widget = HtmlHelp(dialog_box, wx.ID_ANY)
-    html_widget.SetPage(help_data["html"].decode("utf-8"))
+    html_widget.page = help_data["html"].decode("utf-8")
     dialog_box.ShowModal()
     dialog_box.Destroy()

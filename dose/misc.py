@@ -1,4 +1,5 @@
 """Dose GUI for TDD: miscellaneous functions."""
+import inspect
 
 
 def snake2ucamel(value):
@@ -18,3 +19,14 @@ def attr_item_call_auto_cache(func):
       "__doc__": func.__doc__, # Class docstring can't be updated afterwards
       "__module__": func.__module__,
     })()
+
+
+def ucamel_method(func):
+    """
+    Decorator to ensure the given snake_case method is also written in
+    UpperCamelCase in the given namespace. That was mainly written to
+    avoid confusion when using wxPython and its UpperCamelCaseMethods.
+    """
+    frame_locals = inspect.currentframe().f_back.f_locals
+    frame_locals[snake2ucamel(func.__name__)] = func
+    return func

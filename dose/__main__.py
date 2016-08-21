@@ -1,6 +1,7 @@
 """Dose GUI for TDD: main script / entry point."""
 import sys, pipes
 from dose._legacy import DoseMainWindow
+from dose.misc import ucamel_method
 
 
 def main_wx(test_command=None):
@@ -8,7 +9,8 @@ def main_wx(test_command=None):
 
     class DoseApp(wx.App):
 
-        def OnInit(self): # Called by wxPython
+        @ucamel_method
+        def on_init(self): # Called by wxPython
             self.SetAppName("dose")
             wnd = DoseMainWindow(None)
             wnd.Show()
