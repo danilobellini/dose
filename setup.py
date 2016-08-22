@@ -32,7 +32,7 @@ metadata = {
   "author_email": dose.__author_email__,
   "url": dose.__url__,
   "description": dose.rest.single_line_block("summary", README),
-  "long_description": dose.rest.all_but_block("summary", README),
+  "long_description": dose.rest.all_but_blocks("summary", README),
   "license": "GPLv3",
   "packages": setuptools.find_packages(),
   "install_requires": ["watchdog>=0.6.0",

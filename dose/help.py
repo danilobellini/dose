@@ -1,17 +1,19 @@
 """Dose GUI for TDD: help dialog box and its underlying HTML processing."""
-import wx, wx.html, docutils.core
-from .rest import all_but_block
+import itertools, wx, wx.html, docutils.core
+from .rest import all_but_blocks
 from .shared import README, CHANGES
 from .misc import ucamel_method
 
 
 help_data = {}
 
-help_data["rst"] = "\n".join([all_but_block("copyright", README), ""] +
-                             CHANGES)
+help_data["rst"] = list(itertools.chain(
+  all_but_blocks(("copyright", "not-in-help"), README, newline=None),
+  CHANGES
+))
 
 help_data["body"] = docutils.core.publish_parts(
-  source = help_data["rst"],
+  source = "\n".join(help_data["rst"]),
   writer_name = "html",
 )["html_body"].encode("utf-8")
 

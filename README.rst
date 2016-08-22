@@ -74,6 +74,8 @@ your test command, e.g. ``dose "cd toxinidir && tox"``.
   https://pypi.python.org/pypi/watchdog
 
 
+.. not-in-help
+
 Requirements
 ------------
 
@@ -98,6 +100,8 @@ Installation
 
 ``pip install dose``
 
+.. not-in-help end
+
 
 GUI Controls
 ------------
@@ -109,7 +113,11 @@ GUI Controls
 
 A right click (or Ctrl + click on OSX) show more options.
 
+.. not-in-help
+
 Please see the CHANGES.rst file for more information.
+
+.. not-in-help end
 
 
 ----
