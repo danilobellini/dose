@@ -5,8 +5,9 @@ Development
 -----------
 
 * New "Help..." popup menu item that displays a new window containing
-  most of the ``README.rst`` and ``CHANGES.rst`` contents. Clicking on
-  a link opens it in the default web browser.
+  most of the ``README.rst`` and ``CHANGES.rst`` contents. It also
+  includes a table of contents with links to the text sections.
+  Clicking on an external link opens it in the default web browser.
 
   This feature requires docutils_ for converting the reStructuredText
   data to HTML, therefore it's a new Dose dependency. There's no extra

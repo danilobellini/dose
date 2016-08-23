@@ -1,4 +1,4 @@
-"""Dose GUI for TDD: README.rst processing functions."""
+"""Dose GUI for TDD: reStructuredText processing functions."""
 import itertools
 
 # Be careful: this file is imported by setup.py!
@@ -80,3 +80,38 @@ def single_line(value):
 def single_line_block(name, data):
     """Single line version of get_block."""
     return single_line(get_block(name, data))
+
+
+def get_sections(data):
+    """
+    List of tuples (section, symbol, contents) containing the given
+    reStructuredText divided by its sections. The input should be a
+    list of single line strings.
+    """
+    no_trail = [row.rstrip() for row in data]
+    starts = [(r1, r2[0], idx)
+              for idx, (r1, r2) in enumerate(zip(no_trail, no_trail[1:]))
+              if r1 and len(r1) == len(r2) and all(ch == r2[0] for ch in r2)]
+    if starts[0][2] != 0:
+        starts.insert(0, (None, None, 0)) # Empty starting section
+    starts.append((None, None, len(no_trail))) # Last section slice stop value
+    return [(section, symbol, no_trail[start+2:stop]) # Skip section name
+            for (section, symbol, start), (next_section, next_symbol, stop)
+                in zip(starts, starts[1:])]
+
+
+def rst_toc(data, with_links=True):
+    """
+    Creates a "Table of Contents" as a bullet list in reStructuredText.
+    Returns a generator of lines.
+    """
+    fmt = "{indent}* `{name} <{name}_>`_" if with_links else "{indent}* {name}"
+    for name, symbol, content in get_sections(data):
+        indent = "  " if symbol == "-" else ""
+        yield fmt.format(**locals())
+        yield "" # Required when nesting
+
+
+def section_header(title, symbol="="):
+    """A 2-line reStructuredText section header as a list of lines."""
+    return [title, symbol * len(title)]
