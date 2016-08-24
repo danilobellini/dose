@@ -1,10 +1,30 @@
 """Dose GUI for TDD: miscellaneous functions."""
-import inspect
+import inspect, string, itertools
 
 
 def snake2ucamel(value):
     """Casts a snake_case string to an UpperCamelCase string."""
-    return "".join(el.capitalize() for el in value.split("_"))
+    UNDER, LETTER, OTHER = object(), object(), object()
+    def group_key_function(char):
+        if char == "_":
+            return UNDER
+        if char in string.ascii_letters:
+            return LETTER
+        return OTHER
+    def process_group(idx, key, chars):
+        if key is LETTER:
+            return "".join([chars[0].upper()] + chars[1:])
+        if key is OTHER     \
+        or len(chars) != 1  \
+        or idx in [0, last] \
+        or LETTER not in (groups[idx-1][1], groups[idx+1][1]):
+            return "".join(chars)
+        return ""
+    raw_groups_gen = itertools.groupby(value, key=group_key_function)
+    groups = [(idx, key, list(group_gen))
+              for idx, (key, group_gen) in enumerate(raw_groups_gen)]
+    last = len(groups) - 1
+    return "".join(itertools.starmap(process_group, groups))
 
 
 def attr_item_call_auto_cache(func):

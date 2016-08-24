@@ -22,6 +22,11 @@ Development
 * More abstract setup.py that installs from anywhere and gets the
   shared files from the ``MANIFEST.in``.
 
+* Include a minimal test suite for Dose with unit tests for a single
+  miscellaneous function and still without a code coverage report.
+  The shoemaker's son always goes barefoot, or at least it did until
+  now. Better late than never.
+
 
 v1.1.1
 ------
