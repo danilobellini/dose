@@ -32,13 +32,19 @@ def attr_item_call_auto_cache(func):
     Decorator for a a single positional argument function to cache
     its results and to make ``f("a") == f["a"] == f.a``.
     """
-    return type(snake2ucamel(func.__name__), (dict,), {
-      "__missing__": staticmethod(func),
+    def __missing__(self, key):
+        result = self[key] = func(key)
+        return result
+    wrapper = type(snake2ucamel(func.__name__), (dict,), {
+      "__missing__": __missing__,
       "__call__": dict.__getitem__,
       "__getattr__": dict.__getitem__,
       "__doc__": func.__doc__, # Class docstring can't be updated afterwards
       "__module__": func.__module__,
     })()
+    for k, v in vars(func).items():
+        setattr(wrapper, k, v)
+    return wrapper
 
 
 def ucamel_method(func):
