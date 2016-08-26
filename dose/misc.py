@@ -1,6 +1,18 @@
 """Dose GUI for TDD: miscellaneous functions."""
 import inspect, string, itertools
 
+# Be careful: this file is imported by setup.py!
+
+
+def tail(iterable):
+    """Iterator for the given iterable that skips its first item."""
+    iterator = iter(iterable)
+    try:
+        next(iterator)
+    except StopIteration:
+        pass
+    return iterator
+
 
 def snake2ucamel(value):
     """Casts a snake_case string to an UpperCamelCase string."""

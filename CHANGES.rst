@@ -25,8 +25,8 @@ Development
 * Cache the terminal printer functions (e.g. the ones used for
   coloring) as a slight optimization.
 
-* Include a minimal test suite for Dose with unit tests for the
-  miscellaneous functions, still without a code coverage report.
+* Include a minimal test suite for Dose, testing some functions in
+  ``misc.py`` and ``rest.py``, still without a code coverage report.
   The shoemaker's son always goes barefoot, or at least it did until
   now. Better late than never.
 

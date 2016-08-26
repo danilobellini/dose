@@ -1,5 +1,6 @@
 """Dose GUI for TDD: reStructuredText processing functions."""
 import itertools
+from .misc import tail
 
 # Be careful: this file is imported by setup.py!
 
@@ -19,13 +20,15 @@ def indent_size(line):
 
 def get_block(name, data, newline="\n"):
     """
-    Joined multiline string block from a list of strings data. The
+    First block in a list of one line strings containing
+    reStructuredText data. The result is as a joined string with the
+    given newline, or a line generator if it's None. The
     BLOCK_START and BLOCK_END delimiters are selected with the given
     name and aren't included in the result.
     """
     lines = itertools.dropwhile(not_eq(BLOCK_START % name), data)
-    next(lines) # Skip the start line, raise an error if there's no start line
-    return newline.join(itertools.takewhile(not_eq(BLOCK_END % name), lines))
+    gen = itertools.takewhile(not_eq(BLOCK_END % name), tail(lines))
+    return gen if newline is None else newline.join(gen)
 
 
 def all_but_blocks(names, data, newline="\n", remove_empty_next=True,
