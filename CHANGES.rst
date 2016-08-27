@@ -27,6 +27,8 @@ Development
 
 * Include a minimal test suite for Dose, testing some functions in
   ``misc.py`` and ``rest.py``, still without a code coverage report.
+  The test suite includes a flake8_ environment for code
+  linting, McCabe complexity verification and style checking.
   The shoemaker's son always goes barefoot, or at least it did until
   now. Better late than never.
 
@@ -315,6 +317,7 @@ alpha-2012.10.02
   unicode.
 
 
+.. _flake8: https://pypi.python.org/pypi/flake8
 .. _docutils: https://pypi.python.org/pypi/docutils
 .. _setuptools: https://pypi.python.org/pypi/setuptools
 .. _distutils: https://docs.python.org/2/library/distutils.html

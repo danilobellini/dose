@@ -49,7 +49,6 @@ def _fix_watchdog_inotify():
     """
     if platform.system() == "Linux":
         from watchdog.observers.inotify_c import Inotify
-        from functools import wraps
 
         parser = Inotify._parse_event_buffer
         @staticmethod
