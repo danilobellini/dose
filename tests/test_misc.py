@@ -1,5 +1,29 @@
 """Dose GUI for TDD: test module for the miscellaneous functions."""
-from dose.misc import snake2ucamel, attr_item_call_auto_cache, ucamel_method
+import itertools
+from dose.misc import (not_eq, tail, snake2ucamel, attr_item_call_auto_cache,
+                       ucamel_method)
+
+
+def test_not_eq():
+    not_one = not_eq(1)
+    assert not not_one(1)
+    assert not_one(2)
+
+
+class TestTail(object):
+
+    def test_empty_result(self):
+        assert list(tail({})) == []
+        assert list(tail({55})) == []
+
+    def test_few_items(self):
+        assert list(tail(range(5))) == [1, 2, 3, 4]
+
+    def test_from_endless_nested(self):
+        result = tail(tail(itertools.cycle([-1, 2, 9])))
+        expected = [9, -1, 2, 9, -1, 2, 9, -1, 2, 9]
+        selected = [next(result) for unused in expected]
+        assert selected == expected
 
 
 class TestSnake2UCamel(object):

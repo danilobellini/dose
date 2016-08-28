@@ -4,6 +4,11 @@ import inspect, string, itertools
 # Be careful: this file is imported by setup.py!
 
 
+def not_eq(value):
+    """Partial evaluation of ``!=``, ``not_eq(a)(b)`` is ``a != b``."""
+    return lambda el: value != el
+
+
 def tail(iterable):
     """Iterator for the given iterable that skips its first item."""
     iterator = iter(iterable)

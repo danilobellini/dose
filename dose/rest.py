@@ -1,16 +1,11 @@
 """Dose GUI for TDD: reStructuredText processing functions."""
 import itertools
-from .misc import tail
+from .misc import not_eq, tail
 
 # Be careful: this file is imported by setup.py!
 
 BLOCK_START = ".. %s"
 BLOCK_END = ".. %s end"
-
-
-def not_eq(value):
-    """Partial evaluation of ``!=`` for currying"""
-    return lambda el: el != value
 
 
 def indent_size(line):
@@ -76,13 +71,13 @@ def all_but_blocks(names, data, newline="\n", remove_empty_next=True,
 
 
 def single_line(value):
-    """Returns the given string joined to a single line and trimmed."""
-    return " ".join(filter(None, map(str.strip, value.splitlines())))
+    """Single trimmed line from a given list of strings."""
+    return " ".join(filter(None, map(str.strip, value)))
 
 
 def single_line_block(name, data):
     """Single line version of get_block."""
-    return single_line(get_block(name, data))
+    return single_line(get_block(name, data, newline=None))
 
 
 def get_sections(data):
