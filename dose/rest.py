@@ -1,5 +1,5 @@
 """Dose GUI for TDD: reStructuredText processing functions."""
-import itertools
+import itertools, functools
 from .misc import not_eq, tail
 
 # Be careful: this file is imported by setup.py!
@@ -30,44 +30,48 @@ def all_but_blocks(names, data, newline="\n", remove_empty_next=True,
                    remove_comments=True):
     """
     Multiline string from a list of strings data, removing every
-    block with any of the given names, as well as its delimiters.
-    Removes the empty line after BLOCK_END when ``remove_empty_next``
+    block with any of the given names, as well as their delimiters.
+    Removes the empty lines after BLOCK_END when ``remove_empty_next``
     is True. Returns a joined string with the given newline, or a
-    line generator if it's None. This function also removes comments,
-    if desired.
+    line generator if it's None. If desired, this function use
+    ``commentless`` internally to remove the remaining comments.
     """
-    def internal_generator():
-        end = None
-        skip_next = False
-        skip_comment = False
-        indent = 0
-        for line in data:
-            if skip_next:
-                skip_next = False
-                if not line.strip(): # Maybe this "next" line isn't empty
-                    continue
-            elif skip_comment:
-                if line.strip() and indent_size(line) <= indent:
-                    skip_comment = False
-                else:
-                    continue
-            if end is None:
-                if line in blocks:
-                    end = blocks[line]
-                elif remove_comments and line.lstrip().startswith("..") \
-                                     and ":" not in line:
-                    skip_comment = True
-                    indent = indent_size(line)
-                else:
-                    yield line
-            elif end == line:
-                end = None
-                skip_next = remove_empty_next
-
-    all_names = [names] if isinstance(names, str) else names
-    blocks = {BLOCK_START % name: BLOCK_END % name for name in all_names}
-    gen = internal_generator()
+    def remove_blocks(name, iterable):
+        start, end = BLOCK_START % name, BLOCK_END % name
+        it = iter(iterable)
+        while True:
+            line = next(it)
+            while line != start:
+                yield line
+                line = next(it)
+            it = tail(itertools.dropwhile(not_eq(end), it))
+            if remove_empty_next:
+                it = itertools.dropwhile(lambda el: not el.strip(), it)
+    if isinstance(names, str):
+        names = [names]
+    processors = [functools.partial(remove_blocks, name) for name in names]
+    if remove_comments:
+        processors.append(commentless)
+    gen = functools.reduce(lambda result, func: func(result),
+                           processors, data)
     return gen if newline is None else newline.join(gen)
+
+
+def commentless(data):
+    """
+    Generator that removes from a list of strings the double dot
+    reStructuredText comments and its contents based on indentation,
+    removing trailing empty lines after each comment as well.
+    """
+    it = iter(data)
+    while True:
+        line = next(it)
+        while ":" in line or not line.lstrip().startswith(".."):
+            yield line
+            line = next(it)
+        indent = indent_size(line)
+        it = itertools.dropwhile(lambda el: indent_size(el) > indent
+                                            or not el.strip(), it)
 
 
 def single_line(value):

@@ -100,8 +100,8 @@ Installation
 
 ``pip install dose``
 
-.. not-in-help end
 
+.. not-in-help end
 
 GUI Controls
 ------------
@@ -117,8 +117,8 @@ A right click (or Ctrl + click on OSX) show more options.
 
 Please see the CHANGES.rst file for more information.
 
-.. not-in-help end
 
+.. not-in-help end
 
 ----
 
