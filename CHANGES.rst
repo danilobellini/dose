@@ -25,7 +25,7 @@ Development
 * Cache the terminal printer functions (e.g. the ones used for
   coloring) as a slight optimization.
 
-* Include a minimal test suite for Dose, testing some functions in
+* Include a minimal test suite for Dose, testing most members of
   ``misc.py`` and ``rest.py``, still without a code coverage report.
   The test suite includes a flake8_ environment for code
   linting, McCabe complexity verification and style checking.

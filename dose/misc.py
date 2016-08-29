@@ -73,3 +73,21 @@ def ucamel_method(func):
     frame_locals = inspect.currentframe().f_back.f_locals
     frame_locals[snake2ucamel(func.__name__)] = func
     return func
+
+
+class LazyAccess(object):
+    """
+    Lazy access to the object attributes. Create it with a
+    parameterless constructor like ``LazyAccess(lambda: my_object)``.
+    """
+    def __init__(self, parameterless_constructor):
+        self._parameterless_constructor = parameterless_constructor
+
+    def _cache(self, name, value):
+        setattr(self, name, value)
+        return value
+
+    def __getattr__(self, name):
+        if name == "_obj": # Only once
+            return self._cache(name, self._parameterless_constructor())
+        return self._cache(name, getattr(self._obj, name))

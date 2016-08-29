@@ -1,7 +1,7 @@
 """Dose GUI for TDD: test module for the miscellaneous functions."""
 import itertools
 from dose.misc import (not_eq, tail, snake2ucamel, attr_item_call_auto_cache,
-                       ucamel_method)
+                       ucamel_method, LazyAccess)
 
 
 def test_not_eq():
@@ -127,3 +127,39 @@ class TestUCamelMethod(object):
         def this_is_a_function():
             pass
         assert locals()["ThisIsAFunction"] is this_is_a_function
+
+
+def test_lazy_access():
+    class Once(object):
+        some_attribute = "a string"
+        count = 0
+
+        def __init__(self):
+            Once.count += 1
+            assert Once.count == 1
+
+        def some_method(self):
+            return self.some_attribute
+
+        @property
+        def me(self):
+            return self
+
+    la = LazyAccess(Once)
+
+    assert "some_method" not in vars(la)
+    assert "some_attribute" not in vars(la)
+    assert "_obj" not in vars(la)
+
+    assert la.count == 1
+    assert la.some_method() == la.some_attribute == "a string"
+    assert la.some_method.im_func is Once.some_method.im_func
+
+    assert "some_method" in vars(la)
+    assert "some_attribute" in vars(la)
+    assert "_obj" in vars(la)
+
+    assert isinstance(la._obj, Once)
+    assert "me" not in vars(la)
+    assert la.me is la._obj
+    assert "me" in vars(la)
