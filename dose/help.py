@@ -1,8 +1,9 @@
 """Dose GUI for TDD: help dialog box and its underlying HTML processing."""
-import itertools, wx, wx.html, docutils.core
+import itertools, docutils.core
 from . import __url__
 from .rest import all_but_blocks, rst_toc, section_header
 from .shared import README, CHANGES
+from .compat import wx
 
 
 help_data = {

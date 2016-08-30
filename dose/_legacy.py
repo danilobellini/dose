@@ -20,12 +20,13 @@ danilo [dot] bellini [at] gmail [dot] com
 """
 
 from __future__ import division, print_function, unicode_literals
-import wx, os, json, threading
+import os, json, threading
 from datetime import datetime
 from fnmatch import fnmatch
 from functools import wraps
 
 from . import terminal
+from .compat import wx
 
 # Thresholds and other constants
 PI = 3.141592653589793
@@ -70,13 +71,13 @@ def rounded_rectangle_region(width, height, radius):
   """
   Returns a rounded rectangle wx.Region
   """
-  bmp = wx.EmptyBitmapRGBA(width, height) # Mask color is #000000
+  bmp = wx.Bitmap.FromRGBA(width, height) # Mask color is #000000
   dc = wx.MemoryDC(bmp)
   dc.Brush = wx.Brush((255,) * 3) # Any non-black would do
   dc.DrawRoundedRectangle(0, 0, width, height, radius)
   dc.SelectObject(wx.NullBitmap)
   bmp.SetMaskColour((0,) * 3)
-  return wx.RegionFromBitmap(bmp)
+  return wx.Region(bmp)
 
 def int_to_color(color_int):
   """
@@ -362,7 +363,7 @@ class DosePopupMenu(wx.Menu):
         self.AppendSeparator()
       else:
         item = wx.MenuItem(self, wx.ID_ANY, txt)
-        self.AppendItem(item)
+        self.Append(item)
         self.Bind(wx.EVT_MENU, callback, item)
 
 
@@ -599,16 +600,16 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
   def on_define_call_string(self, evt=None):
     msg = "Executable to be called and its arguments:"
     title = "Dose call string"
-    ted = wx.TextEntryDialog(self, message=msg, caption=title,
-                             defaultValue=self.call_string)
+    kwargs = {"value" if wx.PHOENIX else "defaultValue": self.call_string}
+    ted = wx.TextEntryDialog(self, message=msg, caption=title, **kwargs)
     if ted.ShowModal() == wx.ID_OK:
       self.call_string = ted.Value
 
   def on_skip_pattern(self, evt):
     msg = "File names, separated by ';', to have their changes neglected:"
-    title = "Skip pattern"
-    ted = wx.TextEntryDialog(self, message=msg, caption=title,
-                             defaultValue=self.skip_pattern)
+    title = "Ignore pattern"
+    kwargs = {"value" if wx.PHOENIX else "defaultValue": self.skip_pattern}
+    ted = wx.TextEntryDialog(self, message=msg, caption=title, **kwargs)
     if ted.ShowModal() == wx.ID_OK:
       self.skip_pattern = ted.Value
 

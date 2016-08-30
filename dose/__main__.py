@@ -2,10 +2,10 @@
 import sys, pipes
 from dose._legacy import DoseMainWindow
 from dose.misc import ucamel_method
+from dose.compat import wx
 
 
 def main_wx(test_command=None):
-    import wx
 
     class DoseApp(wx.App):
 
@@ -16,6 +16,11 @@ def main_wx(test_command=None):
             wnd.Show()
             self.SetTopWindow(wnd)
             return True # Needed by wxPython
+
+    # At least wx.html should be imported before the wx.App instance is
+    # created, else wx.html.HtmlWindow instances won't render properly
+    # https://github.com/wxWidgets/Phoenix/blob/db8957f/etg/_html.py#L23
+    import wx.html as unused # NOQA
 
     app = DoseApp(redirect=False) # Don't redirect sys.stdout / sys.stderr
     if test_command:

@@ -4,6 +4,10 @@ Dose change log
 Development
 -----------
 
+* Add wxPython Phoenix compatibility. Dose works with either wxPython
+  Classic (2.8/3.0) or Phoenix. The new ``dose.compat.wx`` lazily
+  loads wxPython using the Phoenix naming conventions.
+
 * New "Help..." popup menu item that displays a new window containing
   most of the ``README.rst`` and ``CHANGES.rst`` contents. It also
   includes a table of contents with links to the text sections.

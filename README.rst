@@ -79,14 +79,22 @@ your test command, e.g. ``dose "cd toxinidir && tox"``.
 Requirements
 ------------
 
-- wxPython 2.8 or 3.0 (classic)
+- wxPython 2.8 or 3.0 (either Classic or Phoenix)
 - watchdog
 - docutils
 
-You should install the ``wxpython`` or ``wxgtk`` packages from your
+The only dependency package you have to worry about is wxPython, the
+other ones should be installed together with Dose when they're not
+available. The wxPyWiki have a detailed page on
+`how to install wxPython`_\ , including how to install wxPython
+Phoenix via pip, but for the wxPython Classic
+you should install the ``wxpython`` or ``wxgtk`` packages from your
 Linux distribution, or get the Windows / Mac OS X binary packages
 directly from the `wxPython official site`_\ . On Mac OS X 10.11
 (El Capitan), `this blog post might help`_\ .
+
+.. _`how to install wxPython`:
+  https://wiki.wxpython.org/How%20to%20install%20wxPython
 
 .. _`wxPython official site`:
   https://www.wxpython.org
