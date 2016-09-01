@@ -600,16 +600,16 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
   def on_define_call_string(self, evt=None):
     msg = "Executable to be called and its arguments:"
     title = "Dose call string"
-    kwargs = {"value" if wx.PHOENIX else "defaultValue": self.call_string}
-    ted = wx.TextEntryDialog(self, message=msg, caption=title, **kwargs)
+    ted = wx.TextEntryDialog(self, message=msg, caption=title,
+                             value=self.call_string)
     if ted.ShowModal() == wx.ID_OK:
       self.call_string = ted.Value
 
   def on_skip_pattern(self, evt):
     msg = "File names, separated by ';', to have their changes neglected:"
     title = "Ignore pattern"
-    kwargs = {"value" if wx.PHOENIX else "defaultValue": self.skip_pattern}
-    ted = wx.TextEntryDialog(self, message=msg, caption=title, **kwargs)
+    ted = wx.TextEntryDialog(self, message=msg, caption=title,
+                             value=self.skip_pattern)
     if ted.ShowModal() == wx.ID_OK:
       self.skip_pattern = ted.Value
 

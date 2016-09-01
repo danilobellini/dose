@@ -1,7 +1,7 @@
 """Dose GUI for TDD: test module for the miscellaneous functions."""
 import itertools
 from dose.misc import (not_eq, tail, snake2ucamel, attr_item_call_auto_cache,
-                       ucamel_method, LazyAccess)
+                       ucamel_method, LazyAccess, kw_map)
 
 
 def test_not_eq():
@@ -163,3 +163,21 @@ def test_lazy_access():
     assert "me" not in vars(la)
     assert la.me is la._obj
     assert "me" in vars(la)
+
+
+class TestKwMap(object):
+
+    def test_maps_names(self):
+        @kw_map(a="first", b="second")
+        def add(a, b):
+            return a + b
+        assert add(first=2, second=3) == 5
+
+    def test_with_posargs(self):
+        @kw_map(kwparam1="one")
+        def params_as_tuple(param1, param2, kwparam1, kwparam2=None):
+            return param1, param2, kwparam1, kwparam2
+        assert params_as_tuple(1, 2, 3, 4) == (1, 2, 3, 4)
+        assert params_as_tuple(1, 2, kwparam2=4, one=3) == (1, 2, 3, 4)
+        assert params_as_tuple(2, 3, 4) == (2, 3, 4, None)
+        assert params_as_tuple(2, 3, one=4) == (2, 3, 4, None)

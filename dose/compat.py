@@ -1,6 +1,6 @@
 """Dose GUI for TDD: compatibility utilities."""
 import functools, importlib
-from .misc import LazyAccess
+from .misc import LazyAccess, kw_map
 
 
 class LazyWx(LazyAccess):
@@ -62,6 +62,10 @@ class LazyWx(LazyAccess):
       },
       "wx.Menu": {
         "Append": (None, "wx.Menu.AppendItem"),
+      },
+      "wx.TextEntryDialog": {
+        "__init__": (kw_map(defaultValue="value"),
+                     "wx.TextEntryDialog.__init__")
       },
     }
     _phoenix_names = _not_in_classic + list(_phoenix2classic) \

@@ -1,5 +1,5 @@
 """Dose GUI for TDD: miscellaneous functions."""
-import inspect, string, itertools
+import inspect, string, itertools, functools
 
 # Be careful: this file is imported by setup.py!
 
@@ -91,3 +91,21 @@ class LazyAccess(object):
         if name == "_obj": # Only once
             return self._cache(name, self._parameterless_constructor())
         return self._cache(name, getattr(self._obj, name))
+
+
+def kw_map(**kws):
+    """
+    Decorator for renamed keyword arguments, given a keyword argument
+    mapping "actual_name: kwarg_rename" for each keyword parameter to
+    be renamed.
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            for actual_name, kwarg_rename in kws.items():
+                if kwarg_rename in kwargs:
+                    kwargs[actual_name] = kwargs[kwarg_rename]
+                    del kwargs[kwarg_rename]
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
