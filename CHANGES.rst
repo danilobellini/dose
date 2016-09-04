@@ -26,11 +26,20 @@ Development
 * More abstract setup.py that installs from anywhere and gets the
   shared files from the ``MANIFEST.in``.
 
+* New shared resources loader that gets the Dose resources from the
+  ``sys.prefix`` directory, leaving the setuptools ``pkg_resources``
+  package resource loader as a fallback. Therefore, Dose no longer
+  require setuptools_\ , but for installation.
+
+  A wheel_\ /\ pip_ installation actually stores the shared resources
+  in a path relative to ``sys.prefix``, so ``pip install .`` is the
+  recommended way to install dose from a source distribution.
+
 * Cache the terminal printer functions (e.g. the ones used for
   coloring) as a slight optimization.
 
 * Include a minimal test suite for Dose, testing most members of
-  ``misc.py`` and ``rest.py``, still without a code coverage report.
+  ``shared.py``, ``misc.py`` and ``rest.py``.
   The test suite includes a flake8_ environment for code
   linting, McCabe complexity verification and style checking.
   The shoemaker's son always goes barefoot, or at least it did until
@@ -85,7 +94,11 @@ v1.1.1
   metadata variables it requires were moved to another file. While
   fixing it, the resulting about box was rebuilt to use the package
   text files themselves instead of some hardcoded text to be
-  manually updated.
+  manually updated. Actually, that would require a direct setuptools_
+  installation (i.e., calling ``python2 setup.py install``) instead
+  of a pip installation to properly work, as the setuptools ``setup``
+  and its ``pkg_resources.resource_string`` don't use the
+  ``sys.prefix`` as the shared resources root directory.
 
 * Bug fix: use the watching directory as the working directory for
   running the test command instead of the current working directory
@@ -321,6 +334,8 @@ alpha-2012.10.02
   unicode.
 
 
+.. _wheel: http://wheel.readthedocs.io
+.. _pip: https://pip.pypa.io
 .. _flake8: https://pypi.python.org/pypi/flake8
 .. _docutils: https://pypi.python.org/pypi/docutils
 .. _setuptools: https://pypi.python.org/pypi/setuptools

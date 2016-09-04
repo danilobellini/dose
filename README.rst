@@ -106,7 +106,26 @@ directly from the `wxPython official site`_\ . On Mac OS X 10.11
 Installation
 ------------
 
-``pip install dose``
+From PyPI_\ , with pip (recommended)::
+
+  pip install dose
+
+From the source distribution (e.g. after cloning this repository), you
+can either use pip::
+
+  pip install .
+
+Wheel::
+
+  python setup.py bdist_wheel
+  wheel install dist/*.whl
+
+Or setuptools directly (not recommended)::
+
+  python2 setup.py install
+
+.. _PyPI:
+  http://pypi.python.org/pypi/dose
 
 
 .. not-in-help end
