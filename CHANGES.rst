@@ -8,6 +8,11 @@ Development
   Classic (2.8/3.0) or Phoenix. The new ``dose.compat.wx`` lazily
   loads wxPython using the Phoenix naming conventions.
 
+* First version running on Python 3 (using wxPython Phoenix)! It won't
+  run on CPython 3.2 due to some "u"-prefixed unicode literals. Dose
+  requires either CPython 2.7 or CPython 3.3+ as long as that complies
+  with the wxPython requirements.
+
 * New "Help..." popup menu item that displays a new window containing
   most of the ``README.rst`` and ``CHANGES.rst`` contents. It also
   includes a table of contents with links to the text sections.

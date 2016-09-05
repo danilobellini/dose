@@ -1,15 +1,15 @@
 """Dose GUI for TDD: colored terminal."""
-from __future__ import unicode_literals, print_function
+from __future__ import print_function
 from .misc import attr_item_call_auto_cache
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 ANSI_FG_COLOR = {
-  "red": b"\x1b[31m",
-  "yellow": b"\x1b[33m",
-  "magenta": b"\x1b[35m",
-  "cyan": b"\x1b[36m",
+  "red": "\x1b[31m",
+  "yellow": "\x1b[33m",
+  "magenta": "\x1b[35m",
+  "cyan": "\x1b[36m",
 }
-ANSI_FG_RESET = b"\x1b[39m"
+ANSI_FG_RESET = "\x1b[39m"
 
 TERMINAL_WIDTH = 79 # TODO: Get the actual terminal width
 

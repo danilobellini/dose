@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 """Dose GUI for TDD: setup script."""
 import os, setuptools, dose, dose.rest, distutils.filelist
 
@@ -55,7 +55,10 @@ Operating System :: POSIX :: Linux
 Programming Language :: Python
 Programming Language :: Python :: 2
 Programming Language :: Python :: 2.7
-Programming Language :: Python :: 2 :: Only
+Programming Language :: Python :: 3
+Programming Language :: Python :: 3.5
+Programming Language :: Python :: 3.4
+Programming Language :: Python :: 3.3
 Programming Language :: Python :: Implementation :: CPython
 Topic :: Education
 Topic :: Education :: Testing

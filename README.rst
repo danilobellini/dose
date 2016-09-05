@@ -31,8 +31,8 @@ Syntax / Example
 ----------------
 
 Just call ``dose TEST_COMMAND``, where ``TEST_COMMAND`` is what you
-would call to run some test suite. Dose is written in Python 2 but the
-test command can be anything.
+would call to run your test suite in a terminal/console/shell. Dose is
+written in Python but the test command can be any shell command.
 
 *Hint (color)*: The ANSI coloring from the test command is to the
 underlying console. For example, a tox + py.test Python project whose
@@ -80,6 +80,7 @@ your test command, e.g. ``dose "cd toxinidir && tox"``.
 Requirements
 ------------
 
+- Python (2 or 3) with pip/wheel/setuptools
 - wxPython 2.8 or 3.0 (either Classic or Phoenix)
 - watchdog
 - docutils
@@ -123,7 +124,7 @@ Wheel::
 
 Or setuptools directly (not recommended)::
 
-  python2 setup.py install
+  python setup.py install
 
 .. _PyPI:
   http://pypi.python.org/pypi/dose

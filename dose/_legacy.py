@@ -425,7 +425,7 @@ class DoseWatcher(object):
       terminal.clog.cyan("*** {item} {event}: {path} ***".format(
         item = "Directory" if evt.is_directory else "File",
         event = evt.event_type,
-        path = os.path.relpath(evt.src_path, self.directory),
+        path = os.path.relpath(evt.src_path.decode("utf-8"), self.directory),
       ))
 
   def _run_subprocess(self):
@@ -441,7 +441,8 @@ class DoseWatcher(object):
                                             exception=self._emit_exc)
 
   def _watchdog_handler(self, evt):
-    self._last_fnames.append(os.path.relpath(evt.src_path, self.directory))
+    self._last_fnames.append(os.path.relpath(evt.src_path.decode("utf-8"),
+                                             self.directory))
     self._runner.kill() # Triggers end/exception callback
     self._evts.append(evt)
     wx.CallAfter(self._run_subprocess) # After the runner callbacks
@@ -453,7 +454,7 @@ class DoseWatcher(object):
     def selector(evt):
       if evt.is_directory:
         return False
-      path = os.path.relpath(evt.src_path, self.directory)
+      path = os.path.relpath(evt.src_path.decode("utf-8"), self.directory)
       if path in self._last_fnames: # Detected a "killing cycle"
         return False
       for pattern in self.skip_pattern.split(";"):

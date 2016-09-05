@@ -1,8 +1,8 @@
 """Dose GUI for TDD: main script / entry point."""
-import sys, pipes
+import sys
 from dose._legacy import DoseMainWindow
 from dose.misc import ucamel_method
-from dose.compat import wx
+from dose.compat import wx, quote
 
 
 def main_wx(test_command=None):
@@ -31,7 +31,7 @@ def main_wx(test_command=None):
 def main(*args):
     if not args:
         if len(sys.argv) > 2:
-            args = map(pipes.quote, sys.argv[1:])
+            args = map(quote, sys.argv[1:])
         else:
             args = sys.argv[1:]
     main_wx(test_command=" ".join(args))

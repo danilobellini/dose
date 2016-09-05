@@ -1,5 +1,5 @@
 """Dose GUI for TDD: test module for the miscellaneous functions."""
-import itertools
+import sys, itertools
 from dose.misc import (not_eq, tail, snake2ucamel, attr_item_call_auto_cache,
                        ucamel_method, LazyAccess, kw_map)
 
@@ -153,7 +153,11 @@ def test_lazy_access():
 
     assert la.count == 1
     assert la.some_method() == la.some_attribute == "a string"
-    assert la.some_method.im_func is Once.some_method.im_func
+
+    if sys.version_info[0] == 2:
+        assert la.some_method.im_func is Once.some_method.im_func
+    else:
+        assert la.some_method.__func__ is Once.some_method
 
     assert "some_method" in vars(la)
     assert "some_attribute" in vars(la)

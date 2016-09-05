@@ -1,6 +1,8 @@
 """Dose GUI for TDD: compatibility utilities."""
-import functools, importlib
+import sys, functools, importlib
 from .misc import LazyAccess, kw_map
+
+__all__ = ["wx", "quote"]
 
 
 class LazyWx(LazyAccess):
@@ -73,3 +75,8 @@ class LazyWx(LazyAccess):
 
 
 wx = LazyWx("wx")
+
+if sys.version_info < (3, 3):
+    from pipes import quote
+else:
+    from shlex import quote
