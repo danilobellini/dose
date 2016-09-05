@@ -1,49 +1,131 @@
 """Dose GUI for TDD: help dialog box and its underlying HTML processing."""
-import itertools, docutils.core
+import docutils.core, docutils.nodes
 from . import __url__
-from .rest import all_but_blocks, rst_toc, section_header
+from .rest import all_but_blocks
 from .shared import README, CHANGES
 from .compat import wx
 
 
-help_data = {
-  "title": "Dose Help",
-  "toc_msg": [
-    "This help was generated using selected information from the",
-    "Dose ``README.rst`` and ``CHANGES.rst`` project files.",
-    "",
-    __url__,
-  ]
-}
+# Dialog/modal window title
+HELP_TITLE = "Dose Help"
 
-help_data["rst_body"] = list(itertools.chain(
-  all_but_blocks(("copyright", "not-in-help"), README, newline=None),
-  CHANGES
-))
+# HTML Colors
+HELP_BG_COLOR = "#000000"
+HELP_FG_COLOR = "#bbbbbb"
+HELP_LINK_COLOR = "#7fbbff"
 
-help_data["toc"] = rst_toc(help_data["rst_body"])
 
-help_data["rst"] = itertools.chain(
-  section_header(help_data["title"]),
-  [""],
-  help_data["toc"],
-  [""],
-  help_data["toc_msg"],
-  ["", "----", ""],
-  help_data["rst_body"]
-)
+class Doctree2HtmlForWx(docutils.nodes.GenericNodeVisitor):
+    """
+    Translator from a docutils document (doctree) to a
+    ``wx.html.HtmlWindow`` compatible HTML.
 
-help_data["html_body"] = (docutils.core.publish_parts(
-  source = "\n".join(help_data["rst"]),
-  writer_name = "html",
-)["html_body"].replace("<div", "<a")   # Hack to create link
-              .replace("</div", "</a") # anchors for the ToC
-              .replace('class="section" id=', "name=")
-).encode("utf-8")
+    It's a visitor whose ``body`` and ``toc`` attributes are updated
+    on traversing a doctree. The former attribute has the HTML as a
+    list of strings to be joined, the latter has an HTML alike but
+    with a generated table of contents. The result has anchors/links
+    to the different sections.
+    """
+    escape = { # HTML escape codes
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "&": "&amp;",
+    }
+    tags = { # Maps from a doctree node tag name to an HTML element tag name
+      "bullet_list": "ul",
+      "emphasis": "i",
+      "paragraph": "p",
+      "list_item": "li",
+      "literal": "tt",
+      "literal_block": "pre",
+      "reference": "a",
+      "strong": "b",
+    }
+    tags_depart = {k: v.join(["</", ">"]) for k, v in tags.items()}
+    tags_visit = {k: v.join("<>") for k, v in tags.items()}
+    tags_visit["transition"] = "<hr/>"
+    return_to_toc = '<p><a href="#0">&lt;&lt; Return &lt;&lt;</a></p>'
 
-# wx.html.HtmlWindow only renders a HTML subset
-help_data["html"] = '<body bgcolor="#000000" text="#bbbbbb" link="#7fbbff">' \
-                    "{body}</body>".format(body=help_data["html_body"])
+    def __init__(self, document):
+        docutils.nodes.GenericNodeVisitor.__init__(self, document)
+        self.body = []
+        self.toc = ["<ul>"]
+        self.target = 0
+        self.level = 0
+        self.ul_level = 1
+
+    @property
+    def htag(self):
+        return "h%d" % self.level
+
+    def html_escape(self, text):
+        return "".join(self.escape.get(ch, ch) for ch in text)
+
+    def default_visit(self, node):
+        if node.tagname == "#text":
+            self.body.append(self.html_escape(node.astext()))
+        elif node.tagname not in ["document", "comment", "target"]:
+            self.body.append(self.tags_visit[node.tagname])
+
+    def default_departure(self, node):
+        if node.tagname not in ["#text", "transition", "comment", "target"]:
+            self.body.append(self.tags_depart[node.tagname])
+
+    def visit_reference(self, node):
+        self.body.append('<a href="{0}">'.format(node["refuri"]))
+
+    def depart_bullet_list(self, node):
+        self.body.append("\n</ul>\n") # Both "\n" are required here for
+                                      # wx.html.HtmlWindow to properly render
+
+    def visit_section(self, node):
+        if self.level == self.ul_level:
+            self.toc.append("<ul>")
+            self.ul_level += 1
+        self.level += 1
+
+    def depart_section(self, node):
+        if self.level == self.ul_level - 1:
+            self.toc.append("\n</ul>\n")
+            self.ul_level -= 1
+        self.level -= 1
+
+    def visit_title(self, node):
+        if self.target != 0:
+            self.body.extend([self.return_to_toc, "<hr/>"])
+        self.target += 1
+        self.body.append('<a name="{0}"><{1}>'.format(self.target, self.htag))
+        value = self.html_escape(node[0].astext())
+        self.toc.append('<li><a href="#{0}">{1}</li>'.format(self.target,
+                                                             value))
+
+    def depart_title(self, node):
+        self.body.append("</{0}></a>".format(self.htag))
+
+    def depart_document(self, node):
+        self.body.append(self.return_to_toc)
+        self.toc.append("\n</ul>\n")
+
+
+def build_help_html():
+    """Build the help HTML using the shared resources."""
+    readme_part_gen = all_but_blocks("not-in-help", README, newline=None)
+    rst_body = "\n".join(list(readme_part_gen) + CHANGES)
+    doctree = docutils.core.publish_doctree(rst_body)
+    visitor = Doctree2HtmlForWx(doctree)
+    doctree.walkabout(visitor) # Fills visitor.body and visitor.toc
+    return ( # wx.html.HtmlWindow only renders a HTML subset
+      u'<body bgcolor="{bg}" text="{fg}" link="{link}">'
+      u'<a name="0"><h1>{title}</h1></a>'
+      u"{toc}"
+      u"<p>This help was generated using selected information from the\n"
+      u"Dose <tt>README.rst</tt> and <tt>CHANGES.rst</tt> project files.</p>"
+      u'<p><a href="{url}">{url}</a></p><hr/>'
+      u"{body}</body>"
+    ).format(bg=HELP_BG_COLOR, fg=HELP_FG_COLOR, link=HELP_LINK_COLOR,
+             title=HELP_TITLE, toc=u"".join(visitor.toc), url=__url__,
+             body=u"".join(visitor.body))
 
 
 class HtmlHelp(wx.html.HtmlWindow):
@@ -62,15 +144,15 @@ class HtmlHelp(wx.html.HtmlWindow):
         else:
             evt.Skip()
 
-    page = property(fset = lambda self, value: self.SetPage(value))
+    page = property(fset=wx.html.HtmlWindow.SetPage)
 
 
 def help_box():
     """A simple HTML help dialog box using the distribution data files."""
     style = wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
-    dialog_box = wx.Dialog(None, wx.ID_ANY, "Dose Help",
+    dialog_box = wx.Dialog(None, wx.ID_ANY, HELP_TITLE,
                            style=style, size=(620, 450))
     html_widget = HtmlHelp(dialog_box, wx.ID_ANY)
-    html_widget.page = help_data["html"].decode("utf-8")
+    html_widget.page = build_help_html()
     dialog_box.ShowModal()
     dialog_box.Destroy()

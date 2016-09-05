@@ -70,11 +70,12 @@ job.
 command in another directory by using ``cd PATH && TEST_COMMAND`` as
 your test command, e.g. ``dose "cd toxinidir && tox"``.
 
+
+.. not-in-help
+
 .. _watchdog:
   https://pypi.python.org/pypi/watchdog
 
-
-.. not-in-help
 
 Requirements
 ------------
@@ -145,12 +146,8 @@ A right click (or Ctrl + click on OSX) show more options.
 Please see the CHANGES.rst file for more information.
 
 
-.. not-in-help end
-
 ----
 
 .. copyright
 
 Copyright (C) 2012-2016 Danilo de Jesus da Silva Bellini
-
-.. copyright end
