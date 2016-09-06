@@ -1,5 +1,6 @@
 """Dose GUI for TDD: colored terminal."""
 from __future__ import print_function
+import os, sys, fcntl, termios, array, subprocess, signal
 from .misc import attr_item_call_auto_cache
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
@@ -11,7 +12,94 @@ ANSI_FG_COLOR = {
 }
 ANSI_FG_RESET = "\x1b[39m"
 
-TERMINAL_WIDTH = 79 # TODO: Get the actual terminal width
+DEFAULT_TERMINAL_WIDTH = 80
+
+
+class TerminalSize(object):
+    """
+    Console/terminal width information getter.
+
+    There should be only one instance for this class, and it's the
+    ``terminal_size`` object in this module, whose ``width``
+    attribute has the desired terminal width.
+
+    The ``retrieve_width`` method can be called to update the ``width``
+    attribute, but there's also a SIGWINCH (SIGnal: WINdow CHanged)
+    signal handler calling it.
+
+    Several strategies for getting the terminal width are combined
+    in this class, all of them are tried until a width is found. When
+    a strategy returns ``0`` or ``None``, it means it wasn't able to
+    collect the console width.
+
+    Note: The ``terminal_size`` object should have been created in the
+    main thread of execution.
+    """
+    width = DEFAULT_TERMINAL_WIDTH # Fallback
+
+    # Strategies are (method name without the "from_" prefix, arguments list)
+    strategies = [
+      ("io_control", [sys.stdin]),
+      ("io_control", [sys.stdout]),
+      ("io_control", [sys.stderr]),
+      ("tty_io_control", []),
+      ("tput_subprocess", []),
+      ("environment_variable", []),
+    ]
+
+    def __init__(self):
+        signal.signal(signal.SIGWINCH, self.retrieve_width)
+        self.retrieve_width()
+
+    def retrieve_width(self, signum=None, frame=None):
+        """
+        Stores the terminal width into ``self.width``, if possible.
+        This function is also the SIGWINCH event handler.
+        """
+        for method_name, args in self.strategies:
+            method = getattr(self, "from_" + method_name)
+            width = method(*args)
+            if width and width > 0:
+                self.width = width
+                break # Found!
+        os.environ["COLUMNS"] = str(self.width) # A hint for the next test job
+
+    @staticmethod
+    def from_environment_variable():
+        """Gets the width from the ``COLUMNS`` environment variable."""
+        return int(os.environ.get("COLUMNS", "0"))
+
+    @staticmethod
+    def from_io_control(fobj):
+        """
+        Call TIOCGWINSZ (Terminal I/O Control to Get the WINdow SiZe)
+        where ``fobj`` is a file object (e.g. ``sys.stdout``),
+        returning the terminal width assigned to that file.
+
+        See the ``ioctl``, ``ioctl_list`` and tty_ioctl`` man pages
+        for more information.
+        """
+        winsize = array.array("H", [0] * 4) # row, col, xpixel, ypixel
+        if not fcntl.ioctl(fobj.fileno(), termios.TIOCGWINSZ, winsize, True):
+            return winsize[1]
+
+    @classmethod
+    def from_tty_io_control(cls):
+        """Calls cls.from_io_control for the tty file descriptor."""
+        with open(os.ctermid(), "rb") as fobj:
+            return cls.from_io_control(fobj)
+
+    @staticmethod
+    def from_tput_subprocess():
+        """Gets the terminal width from the ``tput`` shell command."""
+        try:
+            return int(subprocess.check_output(["tput", "cols"]))
+        except (OSError,                        # tput not found
+                subprocess.CalledProcessError): # tput didn't return 0
+            return 0
+
+
+terminal_size = TerminalSize()
 
 
 @attr_item_call_auto_cache
@@ -49,16 +137,16 @@ def hr(color):
     symbol repeated. It's a terminal version of the HTML ``<hr>``.
     """
     logger = log(color)
-    return lambda symbol: logger(symbol * TERMINAL_WIDTH)
+    return lambda symbol: logger(symbol * terminal_size.width)
 
 
 def centralize(msg):
     """Add spaces to centralize the string in the terminal."""
-    return msg.center(TERMINAL_WIDTH)
+    return msg.center(terminal_size.width)
 
 
 @attr_item_call_auto_cache
 def clog(color):
     """Same to ``log``, but this one centralizes the message first."""
     logger = log(color)
-    return lambda msg: logger(centralize(msg))
+    return lambda msg: logger(centralize(msg).rstrip())

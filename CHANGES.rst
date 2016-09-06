@@ -1,6 +1,10 @@
 Dose change log
 ===============
 
+* TODO: Make Dose compatible with Windows again, updating the change
+  log on the first version it broke that compatibility.
+
+
 Development
 -----------
 
@@ -23,6 +27,11 @@ Development
   dependency for rendering the resulting HTML, wxPython provides
   the ``HtmlWindow`` widget that renders an HTML subset, and it's
   enough for this task.
+
+* Collects the console/terminal width to show the Dose messages
+  properly centered, and for "horizontal rulers" ("====" lines) to
+  fill the whole line. Use the SIGWINCH (window changed) signal to
+  get the new width when the console window gets resized.
 
 * Use the default accelerator for closing a window in the operating
   system (e.g. Alt+F4). Also, the accelerators were removed from the
