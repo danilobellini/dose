@@ -1,7 +1,7 @@
 """Dose GUI for TDD: test module for the reStructuredText stuff."""
 import pytest, collections, itertools
 from dose.rest import (indent_size, get_block, all_but_blocks, commentless,
-                       single_line, single_line_block, section_header)
+                       single_line, single_line_block)
 
 
 class TestIndentSize(object):
@@ -184,10 +184,3 @@ def test_single_line_block():
     assert single_line_block("blah", TestGetBlock.data) == "some text"
     assert single_line_block("blah",
                              TestGetBlock.double_data) == "another text"
-
-
-def test_section_header():
-    assert section_header("") == ["", ""]
-    assert section_header("T") == ["T", "="]
-    assert section_header("est", "-") == ["est", "---"]
-    assert section_header("Some stuff", "~") == ["Some stuff", "~" * 10]
