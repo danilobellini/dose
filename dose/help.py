@@ -1,5 +1,5 @@
 """Dose GUI for TDD: help dialog box and its underlying HTML processing."""
-import docutils.core, docutils.nodes
+import sys, docutils.core, docutils.nodes
 from . import __url__
 from .rest import all_but_blocks
 from .shared import README, CHANGES
@@ -110,7 +110,11 @@ class Doctree2HtmlForWx(docutils.nodes.GenericNodeVisitor):
 
 def build_help_html():
     """Build the help HTML using the shared resources."""
-    readme_part_gen = all_but_blocks("not-in-help", README, newline=None)
+    if sys.platform == "darwin":
+        remove_from_help = "not-in-help", "linux-windows"
+    else:
+        remove_from_help = "not-in-help", "osx"
+    readme_part_gen = all_but_blocks(remove_from_help, README, newline=None)
     rst_body = "\n".join(list(readme_part_gen) + CHANGES)
     doctree = docutils.core.publish_doctree(rst_body)
     visitor = Doctree2HtmlForWx(doctree)

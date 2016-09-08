@@ -142,13 +142,30 @@ Or setuptools directly (not recommended)::
 GUI Controls
 ------------
 
+.. linux-windows
+
+**On Linux / Windows**
+
 - *Dragging*\ : Move
-- *Dragging holding Ctrl/⌘*\ : Resize
-- *Dragging holding Shift*\ : Controls th transparency
+- *Dragging holding Ctrl*\ : Resize
+- *Dragging holding Shift*\ : Controls the transparency
 - *Double click*\ : start or stop the watcher (can kill the test job)
 
-A right click (or Ctrl + click on OSX) show more options.
+A right click shows more options.
 
+.. linux-windows end
+.. osx
+
+**On Mac OS X**
+
+- *Dragging*\ : Move
+- *Dragging holding ⌘*\ : Resize
+- *Dragging holding ⇧*\ : Controls the transparency
+- *Double click*\ : start or stop the watcher (can kill the test job)
+
+A right click (or Ctrl + mouse click) shows more options.
+
+.. osx end
 .. not-in-help
 
 Please see the CHANGES.rst file for more information.

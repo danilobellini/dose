@@ -27,7 +27,7 @@ class FlushStreamThread(threading.Thread):
 
     # As "run" can't be used with parameters, let's "call" a thread
     def __call__(self, process, stream_in, stream_out, formatter, size):
-        SR = codecs.getreader(stream_out.encoding)
+        SR = codecs.getreader(stream_out.encoding or "utf-8")
         reader = SR(stream_in, errors="ignore")
         if formatter is None:
             while process.poll() is None:

@@ -39,6 +39,22 @@ Development
   console window gets resized. Anyway, the width is always retrieved
   before calling a test job.
 
+  On Windows, Dose doesn't print a character in the last column. That
+  avoids skipping a line due to an implicit line feed when that
+  visible column is also the last buffer column.
+
+* Bug fix: previously, Dose couldn't run on terminals without a
+  detected encoding. With that fixed, Dose can be piped, allowing
+  commands like::
+
+    dose | tee tests.log
+
+  For running Dose writing its output to ``tests.log``, and::
+
+    dose | xargs -d'\n' -n1
+
+  For refreshing whole lines at once.
+
 * Use the default accelerator for closing a window in the operating
   system (e.g. Alt+F4). Also, the accelerators were removed from the
   menu, avoiding a warning for the invalid "Double Click" accelerator.

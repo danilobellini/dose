@@ -8,12 +8,14 @@ DEFAULT_TERMINAL_WIDTH = 80
 
 
 class TerminalSize(object):
-    """
+    r"""
     Console/terminal width information getter.
 
     There should be only one instance for this class, and it's the
     ``terminal_size`` object in this module, whose ``width``
-    attribute has the desired terminal width.
+    attribute has the desired terminal width. The ``usable_width``
+    read-only property has the width that can be safely used with a
+    ``"\n"`` at the end without skipping a line.
 
     The ``retrieve_width`` method can be called to update the ``width``
     attribute, but there's also a SIGWINCH (SIGnal: WINdow CHanged)
@@ -37,6 +39,9 @@ class TerminalSize(object):
           ("windows_handle", [subprocess.STD_OUTPUT_HANDLE]),
           ("windows_handle", [subprocess.STD_ERROR_HANDLE]),
         ]
+        @property
+        def usable_width(self):
+            return self.width - 1
     else: # Linux, OS X and Cygwin
         strategies = [
           ("io_control", [sys.stdin]),
@@ -44,6 +49,9 @@ class TerminalSize(object):
           ("io_control", [sys.stderr]),
           ("tty_io_control", []),
         ]
+        @property
+        def usable_width(self):
+            return self.width
     strategies.extend([
       ("tput_subprocess", []), # Cygwin "tput" works on other Windows consoles
       ("environment_variable", []),
@@ -184,12 +192,12 @@ def hr(color):
     symbol repeated. It's a terminal version of the HTML ``<hr>``.
     """
     logger = log(color)
-    return lambda symbol: logger(symbol * terminal_size.width)
+    return lambda symbol: logger(symbol * terminal_size.usable_width)
 
 
 def centralize(msg):
     """Add spaces to centralize the string in the terminal."""
-    return msg.center(terminal_size.width)
+    return msg.center(terminal_size.usable_width)
 
 
 @attr_item_call_auto_cache
