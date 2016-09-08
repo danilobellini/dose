@@ -39,16 +39,23 @@ class TerminalSize(object):
     width = DEFAULT_TERMINAL_WIDTH # Fallback
 
     # Strategies are (method name without the "from_" prefix, arguments list)
-    strategies = [
-      ("io_control", [sys.stdin]),
-      ("io_control", [sys.stdout]),
-      ("io_control", [sys.stderr]),
-      ("tty_io_control", []),
-      ("tput_subprocess", []),
-      ("environment_variable", []),
-    ]
     if sys.platform == "win32":
-        strategies = strategies[-2:]
+        strategies = [
+          ("windows_handle", [subprocess.STD_INPUT_HANDLE]),
+          ("windows_handle", [subprocess.STD_OUTPUT_HANDLE]),
+          ("windows_handle", [subprocess.STD_ERROR_HANDLE]),
+        ]
+    else: # Linux, OS X and Cygwin
+        strategies = [
+          ("io_control", [sys.stdin]),
+          ("io_control", [sys.stdout]),
+          ("io_control", [sys.stderr]),
+          ("tty_io_control", []),
+        ]
+    strategies.extend([
+      ("tput_subprocess", []), # Cygwin "tput" works on other Windows consoles
+      ("environment_variable", []),
+    ])
 
     def __init__(self):
         try:
@@ -108,6 +115,29 @@ class TerminalSize(object):
         except (OSError,                        # tput not found
                 subprocess.CalledProcessError): # tput didn't return 0
             return 0
+
+    @staticmethod
+    def from_windows_handle(std_handle):
+        """
+        Use the Windows Console Handles API to get the console width,
+        where ``std_handle`` is the WINAPI ``GetStdHandle`` input
+        (e.g. STD_INPUT_HANDLE).
+
+        https://msdn.microsoft.com/library/windows/desktop/ms682075
+        """
+        from ctypes import windll, c_ushort
+        # https://msdn.microsoft.com/library/windows/desktop/ms683231
+        handle = windll.kernel32.GetStdHandle(std_handle)
+        # https://msdn.microsoft.com/library/windows/desktop/ms682093
+        info = (c_ushort * 11)() # It's a CONSOLE_SCREEN_BUFFER_INFO:
+            # xsize, ysize,             | COORD      dwSize
+            # xcursor, ycursor,         | COORD      dwCursorPosition
+            # attributes,               | WORD       wAttributes
+            # left, top, right, bottom, | SMALL_RECT srWindow
+            # xmax, ymax                | COORD      dwMaximumWindowSize
+        # https://msdn.microsoft.com/library/windows/desktop/ms683171
+        if windll.kernel32.GetConsoleScreenBufferInfo(handle, info):
+            return info[7] - info[5] + 1
 
 
 terminal_size = TerminalSize()
