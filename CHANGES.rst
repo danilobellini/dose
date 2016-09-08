@@ -1,10 +1,6 @@
 Dose change log
 ===============
 
-* TODO: Make Dose compatible with Windows again, updating the change
-  log on the first version it broke that compatibility.
-
-
 Development
 -----------
 
@@ -16,6 +12,9 @@ Development
   run on CPython 3.2 due to some "u"-prefixed unicode literals. Dose
   requires either CPython 2.7 or CPython 3.3+ as long as that complies
   with the wxPython requirements.
+
+* Compatibility with Microsoft Windows is back! This release runs on
+  Windows (and Cygwin) platforms/environments.
 
 * New "Help..." popup menu item that displays a new window containing
   most of the ``README.rst`` and ``CHANGES.rst`` contents. It also
@@ -30,8 +29,10 @@ Development
 
 * Collects the console/terminal width to show the Dose messages
   properly centered, and for "horizontal rulers" ("====" lines) to
-  fill the whole line. Use the SIGWINCH (window changed) signal to
-  get the new width when the console window gets resized.
+  fill the whole line. If the SIGWINCH (window changed) signal is
+  available in the system, it's used to get the new width when the
+  console window gets resized. Anyway, the width is always retrieved
+  before calling a test job.
 
 * Use the default accelerator for closing a window in the operating
   system (e.g. Alt+F4). Also, the accelerators were removed from the
@@ -125,6 +126,12 @@ v1.1.1
   And a traceback is print.
 
 * Rename "Skip pattern" to "Ignore pattern" in the GUI.
+
+* This release isn't natively compatible with Windows due to the lack
+  of a ``os.WNOHANG`` constant in the Python standard library,
+  required by Dose when it waits for its child process (the test job)
+  to be killed before running another one. For running on Windows,
+  this release requires Cygwin.
 
 
 v1.1.0

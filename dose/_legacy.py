@@ -414,6 +414,7 @@ class DoseWatcher(object):
 
   def _print_timestamp(self):
     timestamp = datetime.now()
+    terminal.terminal_size.retrieve_width() # Useful if there's no SIGWINCH
     terminal.hr.yellow("=")
     terminal.clog.yellow("[Dose] {0}".format(timestamp))
     terminal.hr.yellow("=")

@@ -1,5 +1,6 @@
 """Dose GUI for TDD: test job runner."""
 import os, subprocess, threading, sys, contextlib, time, codecs, traceback
+import signal
 from . import terminal
 
 # Durations in seconds
@@ -124,7 +125,7 @@ class RunnerThreadCallback(threading.Thread):
         super(RunnerThreadCallback, self).__init__()
         self.start()
 
-    def kill(self):
+    def kill(self, sig=signal.SIGTERM):
         """
         Terminate the test job.
 
@@ -137,6 +138,12 @@ class RunnerThreadCallback(threading.Thread):
 
         This method behaves as self.join() when the thread isn't alive,
         i.e., it doesn't raise an exception.
+
+        The ``sig`` parameter should be either:
+
+        * ``signal.SIGKILL`` (``9``), on Linux or OSX;
+        * ``signal.SIGTERM`` (``15``), the default value. On Windows
+          this one calls the ``TerminateProcess`` Win32 API function.
         """
         while self.is_alive():
             self.killed = True
@@ -144,8 +151,11 @@ class RunnerThreadCallback(threading.Thread):
             if not self.spawned:
                 continue # Either self.run returns or runner yields
             if self.process.poll() is None: # It's running
-                self.process.terminate()
-                os.waitpid(self.process.pid, os.WNOHANG)
+                self.process.send_signal(sig)
+                try: # There's no os.WNOHANG in Windows
+                    os.waitpid(self.process.pid, getattr(os, "WNOHANG", 1))
+                except OSError: # Ignore "No child processes" error
+                    pass
             break # We already either killed or finished it
         self.join()
 

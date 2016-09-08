@@ -1,6 +1,6 @@
 """Dose GUI for TDD: colored terminal."""
 from __future__ import print_function
-import os, sys, fcntl, termios, array, subprocess, signal
+import os, sys, subprocess, signal
 from .misc import attr_item_call_auto_cache
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
@@ -25,7 +25,8 @@ class TerminalSize(object):
 
     The ``retrieve_width`` method can be called to update the ``width``
     attribute, but there's also a SIGWINCH (SIGnal: WINdow CHanged)
-    signal handler calling it.
+    signal handler updating the width if that's a valid signal in the
+    operating system.
 
     Several strategies for getting the terminal width are combined
     in this class, all of them are tried until a width is found. When
@@ -46,9 +47,14 @@ class TerminalSize(object):
       ("tput_subprocess", []),
       ("environment_variable", []),
     ]
+    if sys.platform == "win32":
+        strategies = strategies[-2:]
 
     def __init__(self):
-        signal.signal(signal.SIGWINCH, self.retrieve_width)
+        try:
+            signal.signal(signal.SIGWINCH, self.retrieve_width)
+        except (AttributeError, ValueError): # There's no SIGWINCH in Windows
+            pass
         self.retrieve_width()
 
     def retrieve_width(self, signum=None, frame=None):
@@ -79,6 +85,7 @@ class TerminalSize(object):
         See the ``ioctl``, ``ioctl_list`` and tty_ioctl`` man pages
         for more information.
         """
+        import fcntl, termios, array
         winsize = array.array("H", [0] * 4) # row, col, xpixel, ypixel
         if not fcntl.ioctl(fobj.fileno(), termios.TIOCGWINSZ, winsize, True):
             return winsize[1]
@@ -91,9 +98,13 @@ class TerminalSize(object):
 
     @staticmethod
     def from_tput_subprocess():
-        """Gets the terminal width from the ``tput`` shell command."""
+        """
+        Gets the terminal width from the ``tput`` shell command,
+        usually available in Linux, OS X and Cygwin (Windows).
+        """
         try:
-            return int(subprocess.check_output(["tput", "cols"]))
+            # Windows require shell=True to avoid the tput extension
+            return int(subprocess.check_output("tput cols", shell=True))
         except (OSError,                        # tput not found
                 subprocess.CalledProcessError): # tput didn't return 0
             return 0
