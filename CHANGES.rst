@@ -16,6 +16,11 @@ Development
 * Compatibility with Microsoft Windows is back! This release runs on
   Windows (and Cygwin) platforms/environments.
 
+  For coloring on Windows, Dose has a new dependency, colorama_\ ,
+  which allows the ANSI codes to be properly mapped to the
+  ``SetConsoleTextAttribute`` function from the Windows Console
+  Handles API.
+
 * New "Help..." popup menu item that displays a new window containing
   most of the ``README.rst`` and ``CHANGES.rst`` contents. It also
   includes a table of contents with links to the text sections.
@@ -164,6 +169,12 @@ v1.1.0
 
   The messages themselves were modified to be centralized including
   only the timestamp prefixed by ``[Dose]``.
+
+  On Windows releases older than the 10 TH2 (Windows 10 Threshold 2),
+  only the Cygwin Terminal supports the ANSI escape codes. This Dose
+  release still runs on Windows consoles that doesn't support these
+  codes, but the messages appear with the escape codes printed like
+  ``←[33m`` instead of changing the color.
 
 * New external configuration file for loading/saving the aesthetic GUI
   state (window position, size, opacity and flip flag). The config is
@@ -354,6 +365,7 @@ alpha-2012.10.02
   unicode.
 
 
+.. _colorama: https://pypi.python.org/pypi/colorama
 .. _wheel: http://wheel.readthedocs.io
 .. _pip: https://pip.pypa.io
 .. _flake8: https://pypi.python.org/pypi/flake8

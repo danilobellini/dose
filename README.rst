@@ -21,10 +21,9 @@ There are 3 states:
 - *Yellow*: Running a test job
 - *Green*: Last test job passed (it returned zero)
 
-The test command output is shown in the console standard output
-whereby Dose was called. The same applies to the standard error, but
-it's red-colored. Dose uses ANSI escaping codes for coloring text in
-a terminal.
+The test job output is written on the standard output, so it should
+appear in the console/terminal whereby Dose was called. The same
+applies to the standard error, whose text should appear in red.
 
 
 Syntax / Example
@@ -34,14 +33,21 @@ Just call ``dose TEST_COMMAND``, where ``TEST_COMMAND`` is what you
 would call to run your test suite in a terminal/console/shell. Dose is
 written in Python but the test command can be any shell command.
 
-*Hint (color)*: The ANSI coloring from the test command is to the
-underlying console. For example, a tox + py.test Python project whose
+*Hint (color)*: Any ANSI escaping code from the test command (e.g.
+colors) is also sent to the standard streams in the underlying
+console (Linux, Mac OS X and Cygwin) or converted by colorama_ to
+Windows Console Handles API calls (Windows). In other words, colors
+are enabled. For example, in a tox + py.test Python project whose
 ``tox.ini`` has ``commands = py.test {posargs}``, you can force the
 py.test coloring with ``dose tox -- --color=yes``.
 
 *Hint (shell)*: You can use shell pipes in your test command by
 quoting the whole command, e.g. ``dose "cat tests.txt | verify.sh"``.
 
+
+.. not-in-help
+.. _colorama: https://pypi.python.org/pypi/colorama
+.. not-in-help end
 
 What does it watch?
 -------------------
@@ -83,6 +89,7 @@ Requirements
 - Python (2 or 3) with pip/wheel/setuptools
 - wxPython 2.8 or 3.0 (either Classic or Phoenix)
 - watchdog
+- colorama
 - docutils
 
 The only dependency package you have to worry about is wxPython, the

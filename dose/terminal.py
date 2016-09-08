@@ -1,16 +1,8 @@
 """Dose GUI for TDD: colored terminal."""
 from __future__ import print_function
-import os, sys, subprocess, signal
+import os, sys, subprocess, signal, colorama
 from .misc import attr_item_call_auto_cache
 
-# https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-ANSI_FG_COLOR = {
-  "red": "\x1b[31m",
-  "yellow": "\x1b[33m",
-  "magenta": "\x1b[35m",
-  "cyan": "\x1b[36m",
-}
-ANSI_FG_RESET = "\x1b[39m"
 
 DEFAULT_TERMINAL_WIDTH = 80
 
@@ -152,8 +144,15 @@ def fg(color):
     with the respective foreground color and foreground reset ANSI
     escape codes. You can also use the ``fg.color`` or ``fg[color]``
     directly as attributes/items.
+
+    The colors are the names of the ``colorama.Fore`` attributes
+    (case insensitive). For more information, see:
+
+    https://pypi.python.org/pypi/colorama
+
+    https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
     """
-    ansi_code = [ANSI_FG_COLOR[color], ANSI_FG_RESET]
+    ansi_code = [getattr(colorama.Fore, color.upper()), colorama.Fore.RESET]
     return lambda msg: msg.join(ansi_code)
 
 
@@ -163,7 +162,14 @@ def log(color):
     Function factory for foreground-colored loggers (printers).
 
     The ``log.color(msg)`` and ``print(fg.color(msg))`` are the
-    same. See ``fg`` for more information.
+    same. On Windows, the ANSI escape codes for colors are mapped to
+    ``SetConsoleTextAttribute`` Windows Console Handles API function
+    calls by the ``colorama`` package.
+
+    https://msdn.microsoft.com/library/windows/desktop/ms686047
+
+    The colorama initialization is on the ``dose.__main__`` module.
+    See ``fg`` for more information.
     """
     foreground = fg(color)
     return lambda msg: print(foreground(msg))

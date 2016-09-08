@@ -1,5 +1,5 @@
 """Dose GUI for TDD: main script / entry point."""
-import sys
+import sys, colorama
 from dose._legacy import DoseMainWindow
 from dose.misc import ucamel_method
 from dose.compat import wx, quote
@@ -34,6 +34,8 @@ def main(*args):
             args = map(quote, sys.argv[1:])
         else:
             args = sys.argv[1:]
+    colorama.init() # Replaces sys.stdout / sys.stderr to
+                    # accept ANSI escape codes on Windows
     main_wx(test_command=" ".join(args))
 
 
