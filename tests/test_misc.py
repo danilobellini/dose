@@ -1,7 +1,8 @@
 """Dose GUI for TDD: test module for the miscellaneous functions."""
-import sys, itertools
+import itertools
 from dose.misc import (not_eq, tail, snake2ucamel, attr_item_call_auto_cache,
                        ucamel_method, LazyAccess, kw_map)
+from dose.compat import PY2
 
 
 def test_not_eq():
@@ -154,7 +155,7 @@ def test_lazy_access():
     assert la.count == 1
     assert la.some_method() == la.some_attribute == "a string"
 
-    if sys.version_info[0] == 2:
+    if PY2:
         assert la.some_method.im_func is Once.some_method.im_func
     else:
         assert la.some_method.__func__ is Once.some_method

@@ -35,8 +35,12 @@ class FlushStreamThread(threading.Thread):
             stream_out.write(reader.read()) # Remaining data
         else:
             while process.poll() is None:
-                stream_out.write(formatter(reader.read(size)))
-            stream_out.write(formatter(reader.read())) # Remaining data
+                data = reader.read(size) # Might be empty
+                if data: # Avoid undesired spurious coloring in Windows
+                    stream_out.write(formatter(data))
+            data = reader.read() # Remaining data
+            if data:
+                stream_out.write(formatter(data))
 
 
 @contextlib.contextmanager

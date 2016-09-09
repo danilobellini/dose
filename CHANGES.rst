@@ -55,6 +55,9 @@ Development
 
   For refreshing whole lines at once.
 
+* Bug fix: paths (directories/files names) are always decoded using
+  the filesystem encoding instead of UTF-8.
+
 * Use the default accelerator for closing a window in the operating
   system (e.g. Alt+F4). Also, the accelerators were removed from the
   menu, avoiding a warning for the invalid "Double Click" accelerator.

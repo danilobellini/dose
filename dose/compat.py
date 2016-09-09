@@ -2,7 +2,7 @@
 import sys, functools, importlib
 from .misc import LazyAccess, kw_map
 
-__all__ = ["wx", "quote"]
+__all__ = ["wx", "quote", "PY2", "UNICODE"]
 
 
 class LazyWx(LazyAccess):
@@ -80,3 +80,10 @@ if sys.version_info < (3, 3):
     from pipes import quote
 else:
     from shlex import quote
+
+PY2 = sys.version_info[0] == 2
+
+if PY2:
+    UNICODE = unicode # NOQA
+else:
+    UNICODE = str
