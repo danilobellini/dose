@@ -1,6 +1,10 @@
 Dose change log
 ===============
 
+The section titles in this change log are the tag names in the git
+repository.
+
+
 Development
 -----------
 

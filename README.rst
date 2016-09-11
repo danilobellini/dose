@@ -1,12 +1,14 @@
+.. not-in-help
+
 ====
 Dose
 ====
 
-.. [TODO] Remove this "pre-section" summary from the Dose Help,
-          moving it to be part of the Help Table of Contents itself
+
+.. not-in-help end
 .. summary
 
-An automated traffic light/signal/semaphore GUI showing the state
+Automated traffic light/signal/semaphore GUI showing the state
 during test driven development (TDD), mainly written for coding dojos.
 
 
@@ -220,6 +222,9 @@ installed with::
   pip install virtualenv
 
 
+.. linux
+
+
 Requirements on Arch Linux
 --------------------------
 
@@ -278,6 +283,10 @@ If you wish to install Dose in a virtualenv, you should install the
 (Python 3) package from APT, following the virtualenv instructions
 afterwards. If these aren't available, you should install the
 virtualenv package from PyPI with pip.
+
+
+.. linux end
+.. osx
 
 
 Requirements on Mac OS X
@@ -379,6 +388,10 @@ To install Python 2 (already comes with pip) and wxPython Classic 3.0::
   brew install python wxpython
 
 
+.. osx end
+.. windows
+
+
 Requirements on Windows
 -----------------------
 
@@ -465,6 +478,7 @@ wxPython installation)::
   echo wx-3.0* > wx.pth
 
 
+.. windows end
 .. not-in-help
 
 ----
@@ -493,7 +507,6 @@ Please see the CHANGES.rst file for more information.
 .. _Cygwin: https://www.cygwin.com
 
 
-.. not-in-help
 .. copyright
 
 Copyright (C) 2012-2016 Danilo de Jesus da Silva Bellini

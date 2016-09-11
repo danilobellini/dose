@@ -6,13 +6,12 @@ from .shared import README, CHANGES
 from .compat import wx
 
 
-# Dialog/modal window title
-HELP_TITLE = "Dose Help"
-
-# HTML Colors
+HELP_TITLE = "Dose Help" # Dialog/modal window title
 HELP_BG_COLOR = "#000000"
 HELP_FG_COLOR = "#bbbbbb"
 HELP_LINK_COLOR = "#7fbbff"
+HELP_LITERAL_COLOR = "#ffffff"
+HELP_INDENT_WIDTH = "2em" # For literal blocks
 
 
 class Doctree2HtmlForWx(docutils.nodes.GenericNodeVisitor):
@@ -37,8 +36,6 @@ class Doctree2HtmlForWx(docutils.nodes.GenericNodeVisitor):
       "emphasis": "i",
       "paragraph": "p",
       "list_item": "li",
-      "literal": "tt",
-      "literal_block": "pre",
       "reference": "a",
       "strong": "b",
     }
@@ -50,10 +47,10 @@ class Doctree2HtmlForWx(docutils.nodes.GenericNodeVisitor):
     def __init__(self, document):
         docutils.nodes.GenericNodeVisitor.__init__(self, document)
         self.body = []
-        self.toc = ["<ul>"]
+        self.toc = []
         self.target = 0
         self.level = 0
-        self.ul_level = 1
+        self.ul_level = 0
 
     @property
     def htag(self):
@@ -79,8 +76,27 @@ class Doctree2HtmlForWx(docutils.nodes.GenericNodeVisitor):
         self.body.append("\n</ul>\n") # Both "\n" are required here for
                                       # wx.html.HtmlWindow to properly render
 
+    def visit_literal(self, node):
+        self.body.append('<font color="{0}"><tt>'.format(HELP_LITERAL_COLOR))
+
+    def depart_literal(self, node):
+        self.body.append("</tt></font>")
+
+    def visit_literal_block(self, node):
+        self.body.append('<font color="{0}"><table border="0"><tr>'
+                           '<td width="{1}"></td>'
+                           '<td><pre>'
+                         .format(HELP_LITERAL_COLOR, HELP_INDENT_WIDTH))
+
+    def depart_literal_block(self, node):
+        self.body.append("</pre></td></tr></table></font>")
+
     def visit_section(self, node):
         if self.level == self.ul_level:
+            if self.ul_level == 0: # The first section starts now
+                self.sectionless = self.body
+                self.body = []
+                self.toc.append("<p/>")
             self.toc.append("<ul>")
             self.ul_level += 1
         self.level += 1
@@ -110,10 +126,13 @@ class Doctree2HtmlForWx(docutils.nodes.GenericNodeVisitor):
 
 def build_help_html():
     """Build the help HTML using the shared resources."""
-    if sys.platform == "darwin":
-        remove_from_help = "not-in-help", "linux-windows"
+    remove_from_help = ["not-in-help", "copyright"]
+    if sys.platform in ["win32", "cygwin"]:
+        remove_from_help.extend(["osx", "linux"])
+    elif sys.platform == "darwin":
+        remove_from_help.extend(["linux", "windows", "linux-windows"])
     else:
-        remove_from_help = "not-in-help", "osx"
+        remove_from_help.extend(["osx", "windows"])
     readme_part_gen = all_but_blocks(remove_from_help, README, newline=None)
     rst_body = "\n".join(list(readme_part_gen) + CHANGES)
     doctree = docutils.core.publish_doctree(rst_body)
@@ -122,13 +141,15 @@ def build_help_html():
     return ( # wx.html.HtmlWindow only renders a HTML subset
       u'<body bgcolor="{bg}" text="{fg}" link="{link}">'
       u'<a name="0"><h1>{title}</h1></a>'
+      u"{sectionless}"
       u"{toc}"
       u"<p>This help was generated using selected information from the\n"
       u"Dose <tt>README.rst</tt> and <tt>CHANGES.rst</tt> project files.</p>"
       u'<p><a href="{url}">{url}</a></p><hr/>'
       u"{body}</body>"
     ).format(bg=HELP_BG_COLOR, fg=HELP_FG_COLOR, link=HELP_LINK_COLOR,
-             title=HELP_TITLE, toc=u"".join(visitor.toc), url=__url__,
+             title=HELP_TITLE, sectionless=u"".join(visitor.sectionless),
+             toc=u"".join(visitor.toc), url=__url__,
              body=u"".join(visitor.body))
 
 
