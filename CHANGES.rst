@@ -83,6 +83,10 @@ Development
   The shoemaker's son always goes barefoot, or at least it did until
   now. Better late than never.
 
+* Include detailed instructions on how to install Dose and its
+  requirements in a Python virtualenv or in the system on all
+  platforms it supports (Linux, Mac OS X, Windows, Cygwin).
+
 
 v1.1.1
 ------

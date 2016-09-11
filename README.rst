@@ -1,16 +1,20 @@
+====
 Dose
 ====
 
+.. [TODO] Remove this "pre-section" summary from the Dose Help,
+          moving it to be part of the Help Table of Contents itself
 .. summary
 
 An automated traffic light/signal/semaphore GUI showing the state
 during test driven development (TDD), mainly written for coding dojos.
 
+
 .. summary end
 
 
 What does it do?
-----------------
+================
 
 Runs a test command when some file is created/modified/deleted,
 showing the return value in a GUI.
@@ -45,10 +49,6 @@ py.test coloring with ``dose tox -- --color=yes``.
 quoting the whole command, e.g. ``dose "cat tests.txt | verify.sh"``.
 
 
-.. not-in-help
-.. _colorama: https://pypi.python.org/pypi/colorama
-.. not-in-help end
-
 What does it watch?
 -------------------
 
@@ -77,68 +77,6 @@ command in another directory by using ``cd PATH && TEST_COMMAND`` as
 your test command, e.g. ``dose "cd toxinidir && tox"``.
 
 
-.. not-in-help
-
-.. _watchdog:
-  https://pypi.python.org/pypi/watchdog
-
-
-Requirements
-------------
-
-- Python (2 or 3) with pip/wheel/setuptools
-- wxPython 2.8 or 3.0 (either Classic or Phoenix)
-- watchdog
-- colorama
-- docutils
-
-The only dependency package you have to worry about is wxPython, the
-other ones should be installed together with Dose when they're not
-available. The wxPyWiki have a detailed page on
-`how to install wxPython`_\ , including how to install wxPython
-Phoenix via pip, but for the wxPython Classic
-you should install the ``wxpython`` or ``wxgtk`` packages from your
-Linux distribution, or get the Windows / Mac OS X binary packages
-directly from the `wxPython official site`_\ . On Mac OS X 10.11
-(El Capitan), `this blog post might help`_\ .
-
-.. _`how to install wxPython`:
-  https://wiki.wxpython.org/How%20to%20install%20wxPython
-
-.. _`wxPython official site`:
-  https://www.wxpython.org
-
-.. _`this blog post might help`:
-  http://davixx.fr/blog/2016/01/25/wxpython-on-os-x-el-capitan/
-
-
-Installation
-------------
-
-From PyPI_\ , with pip (recommended)::
-
-  pip install dose
-
-From the source distribution (e.g. after cloning this repository), you
-can either use pip::
-
-  pip install .
-
-Wheel::
-
-  python setup.py bdist_wheel
-  wheel install dist/*.whl
-
-Or setuptools directly (not recommended)::
-
-  python setup.py install
-
-.. _PyPI:
-  http://pypi.python.org/pypi/dose
-
-
-.. not-in-help end
-
 GUI Controls
 ------------
 
@@ -153,6 +91,7 @@ GUI Controls
 
 A right click shows more options.
 
+
 .. linux-windows end
 .. osx
 
@@ -165,14 +104,396 @@ A right click shows more options.
 
 A right click (or Ctrl + mouse click) shows more options.
 
+
 .. osx end
+
+
+Installation
+============
+
+Dose has few requirements:
+
+- Linux, OS X, Windows or Cygwin (Windows)
+- Python (2 or 3) with pip/wheel/setuptools
+- wxPython 2.8 or 3.0 (either Classic or Phoenix)
+- PyPI packages (auto-installed):
+
+  - watchdog
+  - docutils
+  - colorama
+
+The only dependency package you have to worry about is wxPython, the
+other ones should be installed together with Dose when they're not
+available.
+
+On Python 3, wxPython Phoenix is required (since wxPython Classic
+requires Python 2, modus tollens). Even on Python 2, Phoenix is
+usually easier to install, as it can be installed directly via pip
+no matter the platform or Python version::
+
+  pip install --upgrade --trusted-host wxpython.org --pre \
+              -f http://wxpython.org/Phoenix/snapshot-builds/ \
+              wxPython_Phoenix
+
+The wxPyWiki have a detailed page on `how to install wxPython`_\ ,
+whence that Phoenix install command came. The link includes some
+detailed information on how to install wxPython Classic.
+
+If that's not enough, below are some detailed information on how to
+install Dose and its requirements on each platform/environment/system
+it supports.
+
+
+Installing Dose with pip/wheel/setuptools
+-----------------------------------------
+
+You should install with pip, which gets the Dose wheel from PyPI_
+(recommended)::
+
+  pip install dose
+
+To install from the source distribution (e.g. after cloning this
+repository), you can either use pip (recommended)::
+
+  pip install .
+
+Wheel::
+
+  python setup.py bdist_wheel
+  wheel install dist/*.whl
+
+Or setuptools directly (not recommended)::
+
+  python setup.py install
+
+To uninstall Dose with pip while keeping its requirements installed::
+
+  pip uninstall dose
+
+Other useful and self-explanatory commands are::
+
+  pip install --upgrade dose
+  pip install --force-reinstall dose
+
+Dose should be kept upgraded. To check which Dose version is
+installed, you can use ``pip list`` or ``pip freeze``\ . Without pip,
+you can check the version from the ``dose.__version__`` variable::
+
+  python -c "import dose ; print(dose.__version__)"
+
+
+Python virtualenv
+-----------------
+
+If you wish to install Dose in a Python virtualenv instead of a system
+installation, you should either:
+
+- Install wxPython Phoenix via pip (recommended);
+- Create a Python 2 virtualenv with the ``--system-site-packages``
+  option in a system that already has some wxPython version
+  installed.
+
+On Linux / Mac OS X / Cygwin, this creates a ``venv27`` directory with
+a new virtualenv that can access the system ``site-packages`` library
+directory, i.e., the installed packages::
+
+  virtualenv --system-site-packages -p python2.7 venv27
+
+On Windows, you should just replace ``python2.7`` by your
+``python.exe`` file. You should remove the ``--system-site-packages``
+for a virtualenv with independent libraries.
+
+To activate it (Linux / Mac OS X / Cygwin)::
+
+  source venv27/bin/activate
+
+To activate it (Windows)::
+
+  venv27/Scripts/activate.bat
+
+Afterwards, you should install Dose with pip/wheel/setuptools in the
+activated virtual environment.
+
+If virtualenv isn't available in your Python distribution, it can be
+installed with::
+
+  pip install virtualenv
+
+
+Requirements on Arch Linux
+--------------------------
+
+This distro doesn't include a ``/usr/bin/pip`` script, so you should
+use ``python2 -m pip`` (Python 2) or ``python -m pip`` (Python 3)
+instead of just ``pip``\ . By the way, in this Linux distribution
+``python`` means Python 3, only ``python2`` means Python 2, unless
+you're in a virtualenv. The commands below should be called with
+``sudo``.
+
+When installing pip, you don't need to worry if the Python interpreter
+itself is installed in your system, as the package manager would
+install python for you as a dependency if it's not installed. To
+install pip on Python 3::
+
+  pacman -Sy python-pip
+
+The wxPython Phoenix snapshot can be installed via pip. On the other
+hand, to install pip and wxPython Classic 3.0 on Python 2::
+
+  pacman -Sy python2-pip wxpython
+
+You can replace ``wxpython`` by ``wxpython2.8``\ , that would install
+wxPython Classic 2.8 instead of 3.0.
+
+If you wish to install Dose in a virtualenv, you should install the
+``python-virtualenv`` (Python 3) or the ``python2-virtualenv``
+(Python 2) package with pacman, following the virtualenv instructions
+afterwards.
+
+
+Requirements on Ubuntu/Debian/MINT Linux
+----------------------------------------
+
+You should use ``pip3`` instead of ``pip`` on Python 3, unless you're
+in a virtualenv. The commands below should be called with ``sudo``\ ,
+but you can install the described packages (names after
+"\ *install*\ ") with a APT GUI like ``synaptic`` instead. These
+distros usually come with Python, nevertheless Python itself is
+installed as a dependency when installing pip. Before calling the
+install commands, remember to::
+
+  apt-get update
+
+Installing pip on Python 3::
+
+  apt-get install python3-pip
+
+The wxPython Phoenix snapshot can be installed via pip. To install pip
+and wxPython Classic 2.8 on Python 2::
+
+  apt-get install python-pip python-wxgtk2.8
+
+If you wish to install Dose in a virtualenv, you should install the
+``python-virtualenv`` (Python 2) or the ``python3-virtualenv``
+(Python 3) package from APT, following the virtualenv instructions
+afterwards. If these aren't available, you should install the
+virtualenv package from PyPI with pip.
+
+
+Requirements on Mac OS X
+------------------------
+
+Everything discussed here happens in a console, you can open one via
+Spotlight by pressing Command (⌘) + Space and typing ``Terminal``\ .
+The recommended (and easier) way to install the requirements is via
+Homebrew_\ , even in Mac OS X 10.11 (El Capitan). Another option
+would be installing Python directly from the `Python official site`_
+packages, but that installation procedure isn't described here.
+
+**Python from Mac OS X 10.11 (El Capitan)**
+
+This is an installation procedure without Homebrew_\ , using the
+Python interpreter that comes with Mac OS X 10.11 (El Capitan).
+It comes with Python 2.7, but not with pip. You can install pip
+using the command::
+
+  curl https://bootstrap.pypa.io/get-pip.py | sudo python
+
+If you wish to install wxPython Phoenix via pip without receiving an
+``OSError: [Errno 1] Operation not permitted: ...``\ , you have to
+temporarily disable the *System Integrity Protection*, but that's
+something you probably don't want to do. The same happens with Dose,
+but to avoid that issue you can install Dose directly from its
+``setup.py`` instead of using pip/wheel.
+
+On the other hand, if you wish to install wxPython Classic 3.0,
+you should get the "Cocoa" Mac OS X binary packages directly from the
+`wxPython official site`_\ . But that's not enough, as the package
+structure isn't supported by this OS X version. Following the
+instructions from `the DaviXX' Blog post about wxPython on OS X`_\ ,
+you should:
+
+- In Finder, open (double click) the downloaded dmg file;
+
+- Click with the right mouse button (or a Ctrl + click) on the pkg
+  file, and click on *Show Package Contents*\ ;
+
+- Drag the Contents to your Desktop and, on the same Finder window,
+  eject the "wxPython"-prefixed device;
+
+- Open *Contents*\ , then open *Resources*\ , there you should rename:
+
+  - ``preflight`` to ``preinstall``
+  - ``postflight`` to ``postinstall``
+
+- Open (double click) ``wxPython3.0-osx-cocoa-py2.7.pax.gz``\ , there
+  should appear a ``usr`` directory;
+
+- Create two directories in that very same ``Resources`` directory,
+  with the names:
+
+  - ``pkg_root``
+  - ``scripts``
+
+- Move (drag):
+
+  - ``usr`` to ``pkg_root``
+  - ``preinstall`` to ``scripts``
+  - ``postinstall`` to ``scripts``
+
+- In a Terminal, type these 2 commands (be careful, you should use the
+  ``~`` symbol, not the ``˜`` symbol)::
+
+    cd ~/Desktop/Contents/Resources
+    pkgbuild --root ./pkg_root --scripts ./scripts \
+             --identifier com.wxwidgets.wxpython \
+             ~/Desktop/wxPython3.0-osx-cocoa-py2.7-repackaged.pkg
+
+Wait until the Terminal gives you the *Wrote package* message. You can
+now delete the Contents directory and the downloaded dmg, just open
+(double click) the ``wxPython3.0-osx-cocoa-py2.7-repackaged.pkg`` file
+in your desktop and wxPython Classic 3.0 is installed. The blog post
+aforementioned do the same in a command line approach, if you prefer.
+
+**Homebrew**
+
+A single command in a Terminal is enough to install Homebrew_\ ::
+
+  /usr/bin/ruby -e "$(curl -fsSL \
+    https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+In a terminal, before calling the install commands, remember to::
+
+  brew update
+
+To install Python 3 (already comes with pip, henceforth called
+``pip3`` for this Python version)::
+
+  brew install python3
+
+There you can install wxPython Phoenix via pip (replacing ``pip``
+by ``pip3`` in the install command).
+
+To install Python 2 (already comes with pip) and wxPython Classic 3.0::
+
+  brew install python wxpython
+
+
+Requirements on Windows
+-----------------------
+
+On Windows, you can install Python from some distribution or directly
+from the `Python official site`_ binary packages, the procedure
+described here uses the latter approach.
+
+The installation asks for adding Python to the path, you should add it
+to use ``python``\ , ``pip`` (and ``dose`` afterwards) on any path.
+It's recommended that you keep the installation directory simple (e.g.
+the paths where tox_ looks for Python interpreters: ``C:\Python27``
+for Python 2.7 and ``C:\Python35`` for Python 3.5), as the
+``python.exe`` isn't renamed nor copied to version-specific filenames
+and that becomes an issue if you wish to keep more than one Python
+version installed. The suggested path is the default for Python 2.7,
+but for Python 3.5 you have to choose *Customize installation* to
+change the path.
+
+The Python binary packages for Windows already comes with pip as 3
+executable files in the ``Scripts`` subdirectory in the path where
+Python was installed: ``pip.exe``\ , ``pipA.exe`` and
+``pipA.B.exe``\ , where ``A.B`` is the Python version (e.g. ``2.7``
+or ``3.5``\ ).
+
+A terminal is required for installing Dose and its requirements, as
+well as for using Dose afterwards. You can use either the
+*Windows PowerShell* (\ ``powershell.exe``\ ) or the *Command Prompt*
+(\ ``cmd.exe``\ ), they can be open by pressing *Windows + R* and
+typing the executable filename (without the ``.exe``
+suffix/extension).
+
+If you wish to install wxPython Phoenix, it can be easily installed
+via pip using the formerly described command, you just have to care
+about the path: you can see if pip is in the path by trying to call
+it or by seeing in the PowerShell if ``$env:path`` includes the
+Python scripts directory (e.g. ``C:\Python27\Scripts``\ ). If not,
+you should go to that directory before calling pip, e.g.::
+
+  cd \Python27\Scripts
+  pip install dose
+
+On Python 2.7, you can install wxPython Classic from the package in
+the `wxPython official site`_\ . If you've installed Python in the
+recommended path, the installer should detect the installation path.
+If you installed Python on ``C:\Python27`` (the Python installation
+path and also the directory where the ``python.exe`` lies), then
+you should install wxPython on ``C:\Python27\Lib\site-packages``.
+If Python was installed otherwhere, the ``\Lib\site-packages``
+suffix should be added accordingly. When asked, use the full
+installation (i.e., everything checked).
+
+
+Requirements on Cygwin (Windows)
+--------------------------------
+
+If you just wish to run Dose on Windows, you should read the previous
+section instead. Cygwin_ is another platform, one that runs on Windows
+and has many resources from Linux. On Cygwin, even the Python
+resources aren't the same.
+
+To install Python 2, pip and wxPython Classic 3.0 on Cygwin, you
+have to install these packages from the Cygwin installer (as well
+as their dependencies detected by the installer):
+
+- ``Net/curl``
+- ``Python/python``
+- ``Libs/python-wx3.0``
+- ``X11/xinit``
+- ``X11/xorg-server``
+
+Open the *Start Menu -> Cygwin-X -> XWin Server*\ , it will just flash
+and disappear, but its X and C icons should appear in the taskbar.
+Click on the *C icon -> System -> Cygwin Terminal* to open a terminal
+that can display a X GUI in Windows.
+
+To install pip, you should use this command in the Cygwin Terminal::
+
+  curl https://bootstrap.pypa.io/get-pip.py | python
+
+To activate wxPython Classic 3.0 (i.e., to make it the default
+wxPython installation)::
+
+  cd /lib/python2.7/site-packages
+  echo wx-3.0* > wx.pth
+
+
 .. not-in-help
-
-Please see the CHANGES.rst file for more information.
-
 
 ----
 
+Please see the CHANGES.rst file for more information.
+
+----
+
+.. _colorama: https://pypi.python.org/pypi/colorama
+.. _watchdog: https://pypi.python.org/pypi/watchdog
+
+.. not-in-help end
+
+.. _`how to install wxPython`:
+  https://wiki.wxpython.org/How%20to%20install%20wxPython
+
+.. _PyPI: http://pypi.python.org/pypi/dose
+.. _Homebrew: http://brew.sh
+.. _`Python official site`: https://www.python.org
+.. _`wxPython official site`: https://www.wxpython.org
+
+.. _`the DaviXX' Blog post about wxPython on OS X`:
+  http://davixx.fr/blog/2016/01/25/wxpython-on-os-x-el-capitan/
+
+.. _tox: https://tox.readthedocs.io
+.. _Cygwin: https://www.cygwin.com
+
+
+.. not-in-help
 .. copyright
 
 Copyright (C) 2012-2016 Danilo de Jesus da Silva Bellini
