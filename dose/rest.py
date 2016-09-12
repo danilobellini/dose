@@ -1,11 +1,18 @@
 """Dose GUI for TDD: reStructuredText processing functions."""
-import itertools, functools
+import itertools, functools, re
 from .misc import not_eq, tail
 
 # Be careful: this file is imported by setup.py!
 
 BLOCK_START = ".. %s"
 BLOCK_END = ".. %s end"
+REGEX_ABS_URLS = re.compile(r"""
+  (?<= ..\s)  \s* # Link targets and images starts like comments
+  (image :: |     # \1 is either an image,
+   _\S+  :  |     #              a link target without spaces,
+   _`.+` :  ) \s* #           or a link target enclosed within backticks
+  ([^:/][^:]*) $  # \2 is the url
+""", re.VERBOSE)
 
 
 def indent_size(line):
@@ -82,3 +89,13 @@ def single_line(value):
 def single_line_block(name, data):
     """Single line version of get_block."""
     return single_line(get_block(name, data, newline=None))
+
+
+def abs_urls(data, url):
+    """
+    Filter for a list of reStructuredText lines that replaces relative
+    link targets and image sources by absolute URLs given the base URL
+    that should be used. Returns a list of strings.
+    """
+    replacement = r"\1 {0}/\2".format(url.rstrip("/"))
+    return [REGEX_ABS_URLS.sub(replacement, line, count=1) for line in data]

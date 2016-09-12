@@ -21,7 +21,7 @@ def parse_manifest(template_lines):
     return manifest_files.files
 
 
-README = read_plain_text("README.rst")
+README = dose.rest.abs_urls(read_plain_text("README.rst"), url=dose.__url__)
 SHARED_FILES = parse_manifest(read_plain_text("MANIFEST.in"))
 
 

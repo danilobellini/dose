@@ -1,7 +1,7 @@
 """Dose GUI for TDD: test module for the reStructuredText stuff."""
 import pytest, collections, itertools
 from dose.rest import (indent_size, get_block, all_but_blocks, commentless,
-                       single_line, single_line_block)
+                       single_line, single_line_block, abs_urls)
 
 
 class TestIndentSize(object):
@@ -184,3 +184,111 @@ def test_single_line_block():
     assert single_line_block("blah", TestGetBlock.data) == "some text"
     assert single_line_block("blah",
                              TestGetBlock.double_data) == "another text"
+
+
+class TestAbsUrls(object):
+
+    def compare_indent_empty(self, data, expected, url):
+        assert abs_urls(data, url) == expected
+
+        data_no_indent = [line.strip() for line in data]
+        expected_no_indent = [line.strip() for line in expected]
+        assert abs_urls(data_no_indent, url) == expected_no_indent
+
+        data_no_empty = [line for line in data if line.strip()]
+        expected_no_empty = [line for line in expected if line.strip()]
+        assert abs_urls(data_no_empty, url) == expected_no_empty
+
+    def compare_all(self, data, expected, url, colon=":"):
+        # Meta-tests (URL not empty, URL doesn't end with "/", and the data
+        #             images/targets are in a "stuff: data" style)
+        assert url[-1] != "/"
+        assert any(colon + " " in line for line in data)
+        assert all(colon + "  " not in line for line in data)
+        assert all(" " + colon not in line for line in data)
+
+        # Without spaces, e.g. ".. _there:not"
+        data_colon = [line.replace(colon + " ", colon) for line in data]
+
+        # With extra leading spaces, e.g. "..    _there: not"
+        data_space = [line.replace(".. ", "..    ") if colon in line else line
+                      for line in data]
+
+        for new_data in [data, data_colon, data_space]:
+            for new_url in [url, url + "/", url + "//"]:
+                self.compare_indent_empty(data = new_data,
+                                          expected = expected,
+                                          url = new_url)
+
+    def test_empty(self):
+        for data in ([], [""], ["  "]):
+            for url in ("", " ", "not empty"):
+                assert abs_urls(data, url) == data
+
+    def test_without_relative_links_it_should_bypass(self):
+        data = r"""
+        It shouldn't care if the data is indented or not.
+
+        The same should be said about empty lines...
+
+        .. as well as comments
+
+        .. _and things that looks like:links
+
+        As well as valid_ and `another valid`_\ :
+
+        .. _valid: https://absolute/links
+
+        .. _`another valid`: https://absolute/links
+
+        .. image: invalid_image/missing_a_colon.png
+        """.splitlines()
+
+        url = "http://anything"
+        self.compare_indent_empty(data=data, expected=data, url=url)
+
+    def test_link_targets_without_space(self):
+        data = r"""
+        This is a link_ to somewhere `there`_\ .
+
+        .. _`link`: here
+        .. _there: not/h/e/r/e/
+        """.splitlines()
+
+        expected = r"""
+        This is a link_ to somewhere `there`_\ .
+
+        .. _`link`: test_protocol://somewhere/in/time/here
+        .. _there: test_protocol://somewhere/in/time/not/h/e/r/e/
+        """.splitlines()
+
+        url = "test_protocol://somewhere/in/time"
+        self.compare_all(data=data, expected=expected, url=url)
+
+    def test_link_targets_with_space(self):
+        data = r"""
+        .. _`unreferenced target`: somewhere
+        .. _`why not?`: why//should?
+        """.splitlines()
+
+        expected = r"""
+        .. _`unreferenced target`: prefix://here/somewhere
+        .. _`why not?`: prefix://here/why//should?
+        """.splitlines()
+
+        url = "prefix://here"
+        self.compare_all(data=data, expected=expected, url=url)
+
+    def test_image_source(self):
+        data = r"""
+        .. image:: it shouldn't care if it has spaces/extension
+        .. image:: a/image/should/have/two/colons.png
+        """.splitlines()
+
+        expected = r"""
+        .. image:: https://a.b.c/it shouldn't care if it has spaces/extension
+        .. image:: https://a.b.c/a/image/should/have/two/colons.png
+        """.splitlines()
+
+        url = "https://a.b.c"
+        self.compare_all(data=data, expected=expected, url=url, colon="::")

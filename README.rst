@@ -483,7 +483,9 @@ wxPython installation)::
 
 ----
 
-Please see the CHANGES.rst file for more information.
+Please see the `CHANGES.rst`_ file for more information.
+
+.. _`CHANGES.rst`: CHANGES.rst
 
 ----
 
