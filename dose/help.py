@@ -1,4 +1,14 @@
 """Dose GUI for TDD: help dialog box and its underlying HTML processing."""
+import locale # docutils.core calls these locale functions on import time
+try: # Fix this issue: https://bugs.python.org/issue18378
+    locale.getdefaultlocale()
+except ValueError: # Usually with the message "unknown locale: UTF-8"
+    locale.getdefaultlocale = lambda: (None, locale.getpreferredencoding())
+try:
+    locale.getlocale()
+except ValueError: # The same, on Python 3
+    locale.getlocale = locale.getdefaultlocale
+
 import sys, docutils.core, docutils.nodes
 from . import __url__
 from .rest import all_but_blocks

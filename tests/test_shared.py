@@ -1,7 +1,12 @@
 """Dose GUI for TDD: test module for the shared resources module."""
-import pkg_resources, pytest
+import pkg_resources, pytest, sys
 from dose import __version__, __author__
 from dose.shared import get_shared, README, CHANGES, CONTRIBUTORS, LICENSE
+from dose.compat import PY2
+
+
+class RaiserCall(Exception):
+    pass
 
 
 class TestGetShared(object):
@@ -23,7 +28,7 @@ class TestGetShared(object):
 
     def test_get_without_setuptools(self, monkeypatch):
         def raiser(requirement, relative_path):
-            raise Exception("Attempt to call pkg_resources.resource_string")
+            raise RaiserCall("Attempt to call pkg_resources.resource_string")
 
         # Ensure the setuptools "pkg_resources.resource_string" isn't used,
         # given that tox always installs Dose via pip
@@ -33,6 +38,32 @@ class TestGetShared(object):
         assert get_shared("CHANGES.rst").splitlines() == CHANGES
         assert get_shared("CONTRIBUTORS.txt").splitlines() == CONTRIBUTORS
         assert get_shared("COPYING.txt").splitlines() == LICENSE.splitlines()
+
+    def test_homebrew_shared_outside_cellar(self, monkeypatch):
+        cellar_prefix = "/anywhere/in/Cellar/a/path/that/doesnt/exist"
+        fake_prefix = "/anywhere/in"
+        sys_prefix = sys.prefix
+        monkeypatch.setattr(sys, "prefix", cellar_prefix)
+
+        def fake_open(fname, mode="r"):
+            if fname.startswith(fake_prefix) and "Cellar" not in fname:
+                fname = sys_prefix + fname[len(fake_prefix):]
+                fake_open.was_called = True
+            return builtin_open(fname, mode)
+
+        fake_open.was_called = False
+        if PY2:
+            import __builtin__ as builtins
+        else:
+            import builtins
+        builtin_open = builtins.open
+        monkeypatch.setattr(builtins, "open", fake_open)
+
+        self.test_get_without_setuptools(monkeypatch)
+        assert fake_open.was_called # Ensure it tried to open outside Cellar
+
+        with pytest.raises(RaiserCall): # Fallback: setuptools
+            get_shared("This file doesn't exist.rst")
 
     def test_file_doesnt_exist(self, monkeypatch):
         resource_string_bkp = pkg_resources.resource_string

@@ -26,6 +26,19 @@ def get_shared(fname):
     except IOError:
         pass
 
+    # Homebrew (Mac OS X) stores the data in Cellar, a directory in
+    # the system prefix. Calling "brew --prefix" returns that prefix,
+    # and pip installs the shared resources there
+    cellar_index = sys.prefix.find("/Cellar/")
+    if cellar_index != -1: # Found!
+        outside_cellar_path = os.path.join(sys.prefix[:cellar_index],
+                                           *relative_path.split("/"))
+        try:
+            with open(outside_cellar_path) as f:
+                return f.read()
+        except IOError:
+            pass
+
     # Fallback: look for the file using setuptools (perhaps it's still
     # compressed inside an egg file or stored otherwhere)
     from pkg_resources import Requirement, resource_string
