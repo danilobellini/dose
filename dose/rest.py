@@ -81,9 +81,9 @@ def commentless(data):
                                             or not el.strip(), it)
 
 
-def single_line(value):
+def single_line(data):
     """Single trimmed line from a given list of strings."""
-    return " ".join(filter(None, map(str.strip, value)))
+    return " ".join(filter(None, (line.strip() for line in data)))
 
 
 def single_line_block(name, data):

@@ -1,8 +1,7 @@
 """Dose GUI for TDD: test module for the shared resources module."""
-import pkg_resources, pytest, sys
+import pkg_resources, pytest, sys, io
 from dose import __version__, __author__
 from dose.shared import get_shared, README, CHANGES, CONTRIBUTORS, LICENSE
-from dose.compat import PY2
 
 
 class RaiserCall(Exception):
@@ -45,19 +44,15 @@ class TestGetShared(object):
         sys_prefix = sys.prefix
         monkeypatch.setattr(sys, "prefix", cellar_prefix)
 
-        def fake_open(fname, mode="r"):
+        def fake_open(fname, mode="r", encoding="utf-8"):
             if fname.startswith(fake_prefix) and "Cellar" not in fname:
                 fname = sys_prefix + fname[len(fake_prefix):]
                 fake_open.was_called = True
-            return builtin_open(fname, mode)
+            return io_open(fname, mode, encoding=encoding)
 
         fake_open.was_called = False
-        if PY2:
-            import __builtin__ as builtins
-        else:
-            import builtins
-        builtin_open = builtins.open
-        monkeypatch.setattr(builtins, "open", fake_open)
+        io_open = io.open
+        monkeypatch.setattr(io, "open", fake_open)
 
         self.test_get_without_setuptools(monkeypatch)
         assert fake_open.was_called # Ensure it tried to open outside Cellar
