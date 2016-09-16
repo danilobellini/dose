@@ -1,23 +1,19 @@
 #!/usr/bin/env python
 """Dose GUI for TDD: setup script."""
 import os, setuptools, dose, dose.rest, distutils.filelist
+from dose.misc import read_plain_text
 
 SDIST_PATH = os.path.dirname(__file__) # That's also sys.path[0]
 if SDIST_PATH:           # The setuptools.setup function requires this to
     os.chdir(SDIST_PATH) # work properly when called from otherwhere
 
 
-def read_plain_text(fname):
-    """Reads a file as a list of strings."""
-    with open(os.path.join(fname), "r") as f:
-        return f.read().splitlines()
-
-
 def parse_manifest(template_lines):
     """List of file names included by the MANIFEST.in template lines."""
     manifest_files = distutils.filelist.FileList()
     for line in template_lines:
-        manifest_files.process_template_line(line)
+        if line.strip():
+            manifest_files.process_template_line(line)
     return manifest_files.files
 
 

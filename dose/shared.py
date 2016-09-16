@@ -1,6 +1,7 @@
 """Dose GUI for TDD: shared resources."""
-import sys, os, io
+import sys, os
 from . import __version__
+from .misc import read_plain_text
 
 # This module can't be used by the setup.py script!
 
@@ -21,8 +22,7 @@ def get_shared(fname, encoding="utf-8"):
 
     # Look for the file directly on sys.prefix
     try:
-        with io.open(prefixed_path, encoding=encoding) as f:
-            return f.read()
+        return "\n".join(read_plain_text(prefixed_path, encoding=encoding))
     except IOError:
         pass
 
@@ -34,8 +34,8 @@ def get_shared(fname, encoding="utf-8"):
         outside_cellar_path = os.path.join(sys.prefix[:cellar_index],
                                            *relative_path.split("/"))
         try:
-            with io.open(outside_cellar_path, encoding=encoding) as f:
-                return f.read()
+            return "\n".join(read_plain_text(outside_cellar_path,
+                                             encoding=encoding))
         except IOError:
             pass
 

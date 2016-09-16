@@ -1,7 +1,7 @@
 """Dose GUI for TDD: test module for the miscellaneous functions."""
-import itertools
+import itertools, pytest
 from dose.misc import (not_eq, tail, snake2ucamel, attr_item_call_auto_cache,
-                       ucamel_method, LazyAccess, kw_map)
+                       ucamel_method, LazyAccess, kw_map, read_plain_text)
 from dose.compat import PY2
 
 
@@ -186,3 +186,20 @@ class TestKwMap(object):
         assert params_as_tuple(1, 2, kwparam2=4, one=3) == (1, 2, 3, 4)
         assert params_as_tuple(2, 3, 4) == (2, 3, 4, None)
         assert params_as_tuple(2, 3, one=4) == (2, 3, 4, None)
+
+
+class TestReadPlainText(object):
+
+    def test_file_not_found(self):
+        with pytest.raises(IOError):
+            read_plain_text("/this __ / file / doesnt/exist")
+
+    @pytest.mark.parametrize("data", [[],
+                                      ["Single line data"],
+                                      ["", "Empty first line"],
+                                      ["Multi line", "", "data!", ""],
+                                     ])
+    def test_file_data(self, data, tmpdir):
+        txt_file = tmpdir.join("temporary.txt")
+        txt_file.write("\n".join(data))
+        assert read_plain_text(txt_file.strpath) == data

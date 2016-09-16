@@ -1,5 +1,5 @@
 """Dose GUI for TDD: miscellaneous functions."""
-import inspect, string, itertools, functools
+import inspect, string, itertools, functools, io
 
 # Be careful: this file is imported by setup.py!
 
@@ -109,3 +109,16 @@ def kw_map(**kws):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+
+def read_plain_text(fname, encoding="utf-8"):
+    """Reads a file as a list of strings."""
+    with io.open(fname, encoding=encoding) as f:
+        result = list(f)
+    if result:
+        if result[-1][-1:] == "\n":
+            result.append("\n")
+        else:
+            result[-1] += "\n"
+        return [line[:-1] for line in result]
+    return []
