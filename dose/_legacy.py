@@ -20,7 +20,7 @@ danilo [dot] bellini [at] gmail [dot] com
 """
 
 from __future__ import division, print_function, unicode_literals
-import os, json, threading
+import sys, os, json, threading
 from datetime import datetime
 from fnmatch import fnmatch
 from functools import wraps
@@ -104,30 +104,39 @@ class DoseGraphicalSemaphore(wx.Frame):
   at the screen.
   """
   def __init__(self, parent, leds=FIRST_LEDS):
+    super(DoseGraphicalSemaphore, self).__init__() # 1st construction step
     self._config = config = DoseConfig()
+
     frame_style = (wx.FRAME_SHAPED |     # Allows wx.SetShape
                    wx.FRAME_NO_TASKBAR |
                    wx.STAY_ON_TOP |
-                   wx.CLOSE_BOX | # Required on Linux for closing with Alt+F4
                    wx.NO_BORDER
                   )
-    super(DoseGraphicalSemaphore, self).__init__(parent, style=frame_style,
-                                                 pos=config["position"])
-    #self.BackgroundStyle = wx.BG_STYLE_CUSTOM # Avoids flicker
-    self.Bind(wx.EVT_ERASE_BACKGROUND, lambda evt: None)
-    self.Bind(wx.EVT_WINDOW_CREATE,
-              lambda evt: self.SetTransparent(FIRST_OPACITY)
-             ) # Needed to at least have transparency on wxGTK
+    # Required for closing with default accelerator keys (e.g. Alt+F4)
+    if sys.platform != "darwin":    # On OS X, this would display the title
+        frame_style |= wx.CLOSE_BOX # bar and wouldn't enable the Cmd+Q
+
+    if wx.version() >= "3":
+      self.BackgroundStyle = wx.BG_STYLE_PAINT           # Avoids background
+    self.Bind(wx.EVT_ERASE_BACKGROUND, lambda evt: None) # flickering
+    self.Bind(wx.EVT_PAINT, self.on_paint)
+    self.Bind(wx.EVT_WINDOW_CREATE, self.on_create)
+
     self._paint_width, self._paint_height = 0, 0 # Ensure update_sizes at
                                                  # first on_paint
+
     # Uses configuration (without changing the config dictionary)
-    self.ClientSize = config["size"]
     self._flip = config["flipped"]
     self._opacity = config["opacity"]
-    self.SetTransparent(config["opacity"])
+    self._leds = leds
 
-    self.Bind(wx.EVT_PAINT, self.on_paint)
-    self.leds = leds # Refresh!
+    # 2nd construction step
+    self.Create(parent, style=frame_style, pos=config["position"],
+                                           size=config["size"])
+
+  def on_create(self, evt=None):
+    self.SetTransparent(self._opacity)
+    self.leds = self._leds # Refresh!
 
   @property
   def leds(self):
@@ -543,7 +552,7 @@ class DoseMainWindow(DoseInteractiveSemaphore, DoseWatcher):
   def __init__(self, parent):
     DoseInteractiveSemaphore.__init__(self, parent)
     DoseWatcher.__init__(self)
-    self.SetTitle("Disabled - dose") # Seen by the window manager
+    self.SetTitle("Dose") # Seen by the window manager
     self.popmenu = {k:DosePopupMenu(self, k) for k in (True, False)}
 
     self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
