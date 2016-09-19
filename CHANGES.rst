@@ -5,8 +5,8 @@ The section titles in this change log are the tag names in the git
 repository.
 
 
-Development
------------
+v1.2.0
+------
 
 * Add wxPython Phoenix compatibility. Dose works with either wxPython
   Classic (2.8/3.0) or Phoenix. The new ``dose.compat.wx`` lazily
@@ -91,22 +91,30 @@ Development
   requirements in a Python virtualenv or in the system on all
   platforms it supports (Linux, Mac OS X, Windows, Cygwin).
 
+* Add a screenshot for each platform Dose supports.
+
 
 v1.1.1
 ------
 
-* Faster! Waits just 10ms before spawning, and 50ms before killing.
-  Spawns only a single test job subprocess when multiple files are
+* Faster! Dose waits just 10ms before spawning a test job, and
+  spawns only a single test job subprocess when multiple files are
   modified at once.
 
-  That avoids new test job runners as much as possible and is faster
-  than the old procedure of spawning a runner for each modified file
-  to kill afterwards. The kill delay wasn't explicit, but it used
+  Towards an event that triggers a new test job while another job
+  is running, the test job subprocess is killed immediately,
+  unless it happens during the first 50ms after spawning, where
+  the kill happens after that delay.
+
+  That avoids new test job runners as much as possible and it's faster
+  than spawning a runner for each event just to kill it afterwards, as
+  Dose used to do. The kill delay wasn't explicit, but it used
   to have a 50ms polling loop querying for a spawned subprocess.
 
   The 10ms pre-spawn delay is evaluated in a 1ms polling loop, and
   simultaneous file modification events are joined together before
-  that. In other words, Dose can abort a test job earlier.
+  that. In other words, Dose can abort a test job as early as
+  possible.
 
 * More compact logging, without information about the repeated/cyclic
   file modification detection, and printing timestamps only for a
@@ -178,7 +186,7 @@ v1.1.0
   when another event is triggered, and there's no delay to start the
   test job subprocess anymore. Cycles are detected to avoid an endless
   killing-spawning loop. To kill the current running process
-  purposefully, one just need to double click dose with the left mouse
+  purposefully, one just need to double-click dose with the left mouse
   button.
 
 * New test job runner with realtime standard output/error streams.
@@ -328,11 +336,11 @@ v1.0.0
 alpha-2012.10.04
 ----------------
 
-* Use setuptools_ instead of distutils_ in the setup script, allowing
-  it to look for and install the watchdog_ requirement and its
-  dependencies, recursively. It can be installed via ``pip`` and
-  ``easy_install``, as long as the wxPython 2.8 package was previously
-  installed.
+* Use setuptools_ instead of just distutils_ in the setup script,
+  allowing it to look for and install the watchdog_ requirement and
+  its dependencies, recursively. It can be installed using ``pip`` or
+  ``easy_install``, as long as the wxPython 2.8 (classic) was
+  previously installed.
 
 * Customizable file/directory name "skip"/ignore pattern that
   defaults to ``*.pyc; *.pyo; .git/*``. This was done mainly to deal

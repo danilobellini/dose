@@ -189,7 +189,7 @@ def hr(color):
     Colored horizontal rule printer/logger factory.
 
     The resulting function prints an entire terminal row with the given
-    symbol repeated. It's a terminal version of the HTML ``<hr>``.
+    symbol repeated. It's a terminal version of the HTML ``<hr/>``.
     """
     logger = log(color)
     return lambda symbol: logger(symbol * terminal_size.usable_width)

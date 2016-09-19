@@ -18,7 +18,7 @@ metadata = {
 
 
 def about_box():
-    """A simple about box dialog using the distribution data files."""
+    """A simple about dialog box using the distribution data files."""
     about_info = wx.adv.AboutDialogInfo()
     for k, v in metadata.items():
         setattr(about_info, snake2ucamel(k), v)

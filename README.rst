@@ -53,7 +53,7 @@ What does it do?
 ================
 
 Runs a test command when some file is created/modified/deleted,
-showing the return value in a GUI.
+showing the returned value in a GUI.
 
 There are 3 states:
 
@@ -91,16 +91,17 @@ What does it watch?
 Using the watchdog_ package, Dose recursively watches a working
 directory for file creation/modification/deletion events.
 
-The watched directory is the current working directory, the one
-whereby Dose was called. You can change it with the GUI, but remember
-that the test command is always called in that directory too.
+The watched directory is the current working directory whence
+Dose was called. You can change it from the GUI. The test
+command is called in the same directory.
 
-You can also configure an ignore pattern to avoid undesired
-detections on temporary/compiled files.
+There's a customizable ignore pattern to avoid undesired detections on
+temporary/compiled files.
 
-Valid events during a test would kill (SIGTERM) a test job to
-restart it. There's a 10ms delay before starting a test job and a 50ms
-delay before killing it. Multiple events are joined to avoid
+Valid events during a test would kill (SIGTERM) a test job to restart
+it. There's a 10ms delay before starting/spawning a test job
+subprocess, which is kept alive for at least 50ms before being able to
+be killed. Multiple events are handled as a single event to avoid
 spawning/killing more than required.
 
 There's a cycle/repeat detection in the watcher: repeating an event
@@ -294,9 +295,9 @@ Requirements on Ubuntu/Debian/MINT Linux
 ----------------------------------------
 
 You should use ``pip3`` instead of ``pip`` on Python 3, unless you're
-in a virtualenv. The commands below should be called with ``sudo``\ ,
-but you can install the described packages (names after
-"\ *install*\ ") with a APT GUI like ``synaptic`` instead. These
+in a virtualenv. The commands below should be called with ``sudo``\ .
+You can also install the described packages (names after
+"\ *install*\ ") with an APT GUI like ``synaptic``\ . These
 distros usually come with Python, nevertheless Python itself is
 installed as a dependency when installing pip. Before calling the
 install commands, remember to::
@@ -326,7 +327,7 @@ virtualenv package from PyPI with pip.
 Requirements on Mac OS X
 ------------------------
 
-Everything discussed here happens in a console, you can open one via
+Everything discussed here happens in a console, you can open one with
 Spotlight by pressing Command (⌘) + Space and typing ``Terminal``\ .
 The recommended (and easier) way to install the requirements is via
 Homebrew_\ , even in Mac OS X 10.11 (El Capitan). Another option
@@ -358,19 +359,21 @@ you should:
 
 - In Finder, open (double click) the downloaded dmg file;
 
-- Click with the right mouse button (or a Ctrl + click) on the pkg
-  file, and click on *Show Package Contents*\ ;
+- Click with the right mouse button (or Ctrl + click) on the
+  ``wxPython3.0-osx-cocoa-py2.7.pkg`` file, and click on
+  *Show Package Contents*\ ;
 
-- Drag the Contents to your Desktop and, on the same Finder window,
-  eject the "wxPython"-prefixed device;
+- Drag the ``Contents`` directory to your Desktop and, on the same
+  Finder window, eject the "wxPython"-prefixed device;
 
-- Open *Contents*\ , then open *Resources*\ , there you should rename:
+- Open ``Contents``\ , then open ``Resources``\ , there you should
+  rename:
 
   - ``preflight`` to ``preinstall``
   - ``postflight`` to ``postinstall``
 
 - Open (double click) ``wxPython3.0-osx-cocoa-py2.7.pax.gz``\ , there
-  should appear a ``usr`` directory;
+  should appear an ``usr`` directory;
 
 - Create two directories in that very same ``Resources`` directory,
   with the names:
@@ -395,8 +398,9 @@ you should:
 Wait until the Terminal gives you the *Wrote package* message. You can
 now delete the Contents directory and the downloaded dmg, just open
 (double click) the ``wxPython3.0-osx-cocoa-py2.7-repackaged.pkg`` file
-in your desktop and wxPython Classic 3.0 is installed. The blog post
-aforementioned do the same in a command line approach, if you prefer.
+in your desktop and wxPython Classic 3.0 is installed. The
+aforementioned blog post does the same procedure, but in a command
+line approach.
 
 **Homebrew**
 
@@ -445,7 +449,7 @@ but for Python 3.5 you have to choose *Customize installation* to
 change the path.
 
 The Python binary packages for Windows already comes with pip as 3
-executable files in the ``Scripts`` subdirectory in the path where
+executable files in the ``Scripts`` subdirectory on the path where
 Python was installed: ``pip.exe``\ , ``pipA.exe`` and
 ``pipA.B.exe``\ , where ``A.B`` is the Python version (e.g. ``2.7``
 or ``3.5``\ ).
@@ -453,7 +457,7 @@ or ``3.5``\ ).
 A terminal is required for installing Dose and its requirements, as
 well as for using Dose afterwards. You can use either the
 *Windows PowerShell* (\ ``powershell.exe``\ ) or the *Command Prompt*
-(\ ``cmd.exe``\ ), they can be open by pressing *Windows + R* and
+(\ ``cmd.exe``\ ), they can be called by pressing *Windows + R* and
 typing the executable filename (without the ``.exe``
 suffix/extension).
 
@@ -484,9 +488,9 @@ Requirements on Cygwin (Windows)
 If you just wish to run Dose on Windows, you should read the previous
 section instead. Cygwin_ is another platform, one that runs on Windows
 and has many resources from Linux. On Cygwin, even the Python
-resources aren't the same.
+resources are the ones documented as available in POSIX systems.
 
-To install Python 2, pip and wxPython Classic 3.0 on Cygwin, you
+To install Python 2 and wxPython Classic 3.0 on Cygwin, you
 have to install these packages from the Cygwin installer (as well
 as their dependencies detected by the installer):
 
