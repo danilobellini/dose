@@ -13,6 +13,40 @@ during test driven development (TDD), mainly written for coding dojos.
 
 
 .. summary end
+.. not-in-help
+
+.. list-table::
+
+  * + .. image:: images/screenshot_linux.png
+    + - Language: Haskell
+      - Testing with Hspec
+      - Arch Linux
+      - Dose running on Python 2.7.12
+      - wxPython Phoenix 3.0.3.dev2472+78ae39a (gtk2)
+
+  * + .. image:: images/screenshot_osx.png
+    + - Language: Shell script
+      - Testing with roundup
+      - Mac OS X 10.11.6 (El Capitan)
+      - Dose running on Python 3.5.2
+      - wxPython Phoenix 3.0.3.dev2487+3b85464 (osx-cocoa)
+
+  * + .. image:: images/screenshot_windows.png
+    + - Language: Python
+      - Testing with py.test
+      - Windows 7 Home Premium SP1
+      - Dose running on Python 2.7.12
+      - wxPython Classic 2.8.12.1 (msw-unicode)
+
+  * + .. image:: images/screenshot_cygwin.png
+    + - Language: C
+      - Testing with a custom tester
+      - Cygwin 2.876 (Windows)
+      - Dose running on Python 2.7.10
+      - wxPython Classic 3.0.2.0 (gtk2)
+
+
+.. not-in-help end
 
 
 What does it do?
