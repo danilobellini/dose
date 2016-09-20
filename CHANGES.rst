@@ -5,6 +5,16 @@ The section titles in this change log are the tag names in the git
 repository.
 
 
+Development
+-----------
+
+* Fix the egg long description to have a distinct path for GitHub
+  links and GitHub images, based on the relative URLs of the project
+  files. That's a reStructuredText generated from the Dose
+  documentation by the setup script, and uploaded to PyPI on each
+  release. The previous release required a manual to fix these links.
+
+
 v1.2.0
 ------
 

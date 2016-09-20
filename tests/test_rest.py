@@ -188,42 +188,50 @@ def test_single_line_block():
 
 class TestAbsUrls(object):
 
-    def compare_indent_empty(self, data, expected, url):
-        assert abs_urls(data, url) == expected
+    def compare_indent_empty(self, data, expected, **kwargs):
+        assert abs_urls(data, **kwargs) == expected
 
         data_no_indent = [line.strip() for line in data]
         expected_no_indent = [line.strip() for line in expected]
-        assert abs_urls(data_no_indent, url) == expected_no_indent
+        assert abs_urls(data_no_indent, **kwargs) == expected_no_indent
 
         data_no_empty = [line for line in data if line.strip()]
         expected_no_empty = [line for line in expected if line.strip()]
-        assert abs_urls(data_no_empty, url) == expected_no_empty
+        assert abs_urls(data_no_empty, **kwargs) == expected_no_empty
 
-    def compare_all(self, data, expected, url, colon=":"):
+    def compare_all(self, data, expected, target_url, image_url):
         # Meta-tests (URL not empty, URL doesn't end with "/", and the data
         #             images/targets are in a "stuff: data" style)
-        assert url[-1] != "/"
-        assert any(colon + " " in line for line in data)
-        assert all(colon + "  " not in line for line in data)
-        assert all(" " + colon not in line for line in data)
+        assert target_url[-1:] != "/"
+        assert image_url[-1:] != "/"
+        assert any(": " in line for line in data)
+        assert all(":  " not in line for line in data)
+        assert all(" :" not in line for line in data)
 
         # Without spaces, e.g. ".. _there:not"
-        data_colon = [line.replace(colon + " ", colon) for line in data]
+        data_colon = [line.replace(": ", ":") for line in data]
 
         # With extra leading spaces, e.g. "..    _there: not"
+        colon = "::" if any("image::" in line for line in data) else ":"
         data_space = [line.replace(".. ", "..    ") if colon in line else line
                       for line in data]
 
         for new_data in [data, data_colon, data_space]:
-            for new_url in [url, url + "/", url + "//"]:
-                self.compare_indent_empty(data = new_data,
-                                          expected = expected,
-                                          url = new_url)
+            for new_target_url in [target_url, target_url + "/",
+                                               target_url + "//"]:
+                for new_image_url in [image_url, image_url + "/",
+                                                 image_url + "//"]:
+                    self.compare_indent_empty(data = new_data,
+                                              expected = expected,
+                                              target_url = new_target_url,
+                                              image_url = new_image_url)
 
     def test_empty(self):
         for data in ([], [""], ["  "]):
-            for url in ("", " ", "not empty"):
-                assert abs_urls(data, url) == data
+            for target_url in ("", " ", "not empty"):
+                for image_url in ("", " ", "not empty"):
+                    assert abs_urls(data, target_url=target_url,
+                                          image_url=image_url) == data
 
     def test_without_relative_links_it_should_bypass(self):
         data = r"""
@@ -245,7 +253,8 @@ class TestAbsUrls(object):
         """.splitlines()
 
         url = "http://anything"
-        self.compare_indent_empty(data=data, expected=data, url=url)
+        self.compare_indent_empty(data=data, expected=data,
+                                  target_url=url, image_url=url)
 
     def test_link_targets_without_space(self):
         data = r"""
@@ -262,8 +271,8 @@ class TestAbsUrls(object):
         .. _there: test_protocol://somewhere/in/time/not/h/e/r/e/
         """.splitlines()
 
-        url = "test_protocol://somewhere/in/time"
-        self.compare_all(data=data, expected=expected, url=url)
+        self.compare_all(data=data, expected=expected, image_url="",
+                         target_url="test_protocol://somewhere/in/time")
 
     def test_link_targets_with_space(self):
         data = r"""
@@ -276,8 +285,8 @@ class TestAbsUrls(object):
         .. _`why not?`: prefix://here/why//should?
         """.splitlines()
 
-        url = "prefix://here"
-        self.compare_all(data=data, expected=expected, url=url)
+        self.compare_all(data=data, expected=expected, image_url="unused",
+                         target_url="prefix://here")
 
     def test_image_source(self):
         data = r"""
@@ -290,5 +299,21 @@ class TestAbsUrls(object):
         .. image:: https://a.b.c/a/image/should/have/two/colons.png
         """.splitlines()
 
-        url = "https://a.b.c"
-        self.compare_all(data=data, expected=expected, url=url, colon="::")
+        self.compare_all(data=data, expected=expected, target_url="",
+                         image_url="https://a.b.c")
+
+    def test_different_link_target_and_image_source_urls(self):
+        data = r"""
+        .. _targ1: somewhere
+        .. image:: my/image.png
+        .. _`targ 2`: other/where
+        """.splitlines()
+
+        expected = r"""
+        .. _targ1: ftp://x/somewhere
+        .. image:: other://y/my/image.png
+        .. _`targ 2`: ftp://x/other/where
+        """.splitlines()
+
+        self.compare_all(data=data, expected=expected,
+                         target_url="ftp://x", image_url="other://y")

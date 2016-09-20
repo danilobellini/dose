@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Dose GUI for TDD: setup script."""
-import os, setuptools, dose, dose.rest, distutils.filelist
-from dose.misc import read_plain_text
+import os, setuptools, dose, dose.rest, dose.misc, distutils.filelist
 
 SDIST_PATH = os.path.dirname(__file__) # That's also sys.path[0]
 if SDIST_PATH:           # The setuptools.setup function requires this to
@@ -17,8 +16,11 @@ def parse_manifest(template_lines):
     return manifest_files.files
 
 
-README = dose.rest.abs_urls(read_plain_text("README.rst"), url=dose.__url__)
-SHARED_FILES = parse_manifest(read_plain_text("MANIFEST.in"))
+README = dose.rest.abs_urls(dose.misc.read_plain_text("README.rst"),
+                            image_url = "/".join([dose.__url__, "raw",
+                                                  dose.__version__]),
+                            target_url = dose.__url__)
+SHARED_FILES = parse_manifest(dose.misc.read_plain_text("MANIFEST.in"))
 
 
 metadata = {

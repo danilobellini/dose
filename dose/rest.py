@@ -6,11 +6,15 @@ from .misc import not_eq, tail
 
 BLOCK_START = ".. %s"
 BLOCK_END = ".. %s end"
-REGEX_ABS_URLS = re.compile(r"""
+REGEX_ABS_URLS_TARGET = re.compile(r"""
   (?<= ..\s)  \s* # Link targets and images starts like comments
-  (image :: |     # \1 is either an image,
-   _\S+  :  |     #              a link target without spaces,
-   _`.+` :  ) \s* #           or a link target enclosed within backticks
+  (_\S+  : |      # \1 is either a link target without spaces,
+   _`.+` : )  \s* #           or a link target enclosed within backticks
+  ([^:/][^:]*) $  # \2 is the url
+""", re.VERBOSE)
+REGEX_ABS_URLS_IMAGE = re.compile(r"""
+  (?<= ..\s)  \s* # Link targets and images starts like comments
+  (image ::)  \s* # \1 is an image "tag"
   ([^:/][^:]*) $  # \2 is the url
 """, re.VERBOSE)
 
@@ -91,11 +95,17 @@ def single_line_block(name, data):
     return single_line(get_block(name, data, newline=None))
 
 
-def abs_urls(data, url):
+def abs_urls(data, target_url, image_url):
     """
     Filter for a list of reStructuredText lines that replaces relative
-    link targets and image sources by absolute URLs given the base URL
-    that should be used. Returns a list of strings.
+    link targets and image sources by absolute URLs given the base
+    URLs that should be used (``target_url`` for link targets,
+    ``image_url``for image sources). Returns a list of strings.
     """
-    replacement = r"\1 {0}/\2".format(url.rstrip("/"))
-    return [REGEX_ABS_URLS.sub(replacement, line, count=1) for line in data]
+    def replacer(regex, url):
+        replacement = r"\1 {0}/\2".format(url.rstrip("/"))
+        return lambda line: regex.sub(replacement, line, count=1)
+    replacers = [replacer(REGEX_ABS_URLS_TARGET, target_url),
+                 replacer(REGEX_ABS_URLS_IMAGE, image_url)]
+    return [functools.reduce(lambda el, func: func(el), replacers, line)
+            for line in data]
