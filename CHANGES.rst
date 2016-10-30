@@ -8,6 +8,9 @@ repository.
 Development
 -----------
 
+* Add support for CLI options using the Click_ library for
+  parsing.
+
 * Fix the egg long description to have a distinct path for GitHub
   links and GitHub images, based on the relative URLs of the project
   files. That's a reStructuredText generated from the Dose
@@ -421,3 +424,4 @@ alpha-2012.10.02
 .. _104: https://github.com/gorakhargosh/watchdog/issues/104
 .. _157: https://github.com/gorakhargosh/watchdog/issues/157
 .. _watchdog: https://pypi.python.org/pypi/watchdog
+.. _Click: https://pypi.python.org/pypi/click

@@ -1,5 +1,5 @@
 """Dose GUI for TDD: main script / entry point."""
-import sys, colorama
+import colorama, click
 from dose._legacy import DoseMainWindow
 from dose.misc import ucamel_method
 from dose.compat import wx, quote
@@ -28,15 +28,19 @@ def main_wx(test_command=None):
     app.MainLoop()
 
 
-def main(*args):
-    if not args:
-        if len(sys.argv) > 2:
-            args = map(quote, sys.argv[1:])
-        else:
-            args = sys.argv[1:]
+@click.command(context_settings={
+    "allow_interspersed_args": False
+})
+@click.argument('test', nargs=-1, required=False, type=click.UNPROCESSED)
+def main(test):
+    """
+    TEST: test command with options/arguments
+    """
     colorama.init() # Replaces sys.stdout / sys.stderr to
                     # accept ANSI escape codes on Windows
-    main_wx(test_command=" ".join(args))
+    if len(test) > 1:
+        test = map(quote, test)
+    main_wx(test_command=" ".join(test))
 
 
 if __name__ == "__main__": # Not a "from dose import __main__"
