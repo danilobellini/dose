@@ -7,6 +7,46 @@ from .misc import attr_item_call_auto_cache
 DEFAULT_TERMINAL_WIDTH = 80
 
 
+@attr_item_call_auto_cache
+def fg(color):
+    """
+    Foreground color formatter function factory.
+
+    Each function casts from a unicode string to a colored bytestring
+    with the respective foreground color and foreground reset ANSI
+    escape codes. You can also use the ``fg.color`` or ``fg[color]``
+    directly as attributes/items.
+
+    The colors are the names of the ``colorama.Fore`` attributes
+    (case insensitive). For more information, see:
+
+    https://pypi.python.org/pypi/colorama
+
+    https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+    """
+    ansi_code = [getattr(colorama.Fore, color.upper()), colorama.Fore.RESET]
+    return lambda msg: msg.join(ansi_code)
+
+
+@attr_item_call_auto_cache
+def log(color):
+    """
+    Function factory for foreground-colored loggers (printers).
+
+    The ``log.color(msg)`` and ``print(fg.color(msg))`` are the
+    same. On Windows, the ANSI escape codes for colors are mapped to
+    ``SetConsoleTextAttribute`` Windows Console Handles API function
+    calls by the ``colorama`` package.
+
+    https://msdn.microsoft.com/library/windows/desktop/ms686047
+
+    The colorama initialization is on the ``dose.__main__`` module.
+    See ``fg`` for more information.
+    """
+    foreground = fg(color)
+    return lambda msg: print(foreground(msg))
+
+
 class TerminalSize(object):
     r"""
     Console/terminal width information getter.
@@ -94,14 +134,32 @@ class TerminalSize(object):
         """
         import fcntl, termios, array
         winsize = array.array("H", [0] * 4) # row, col, xpixel, ypixel
-        if not fcntl.ioctl(fobj.fileno(), termios.TIOCGWINSZ, winsize, True):
-            return winsize[1]
+        try:
+            if fcntl.ioctl(fobj.fileno(), termios.TIOCGWINSZ, winsize, True):
+                return winsize[1]
+        except OSError as e:
+            # [Errno 25]: Inappropriate ioctl for device (occur when running
+            # from pycharm console in Linux)
+            if e.errno == 25:
+                log.yellow("WARNING: Silently ignoring OSError exception "
+                           "thrown at TerminalSize#from_io_control")
+            else:
+                raise
 
     @classmethod
     def from_tty_io_control(cls):
         """Calls cls.from_io_control for the tty file descriptor."""
-        with open(os.ctermid(), "rb") as fobj:
-            return cls.from_io_control(fobj)
+        try:
+            with open(os.ctermid(), "rb") as fobj:
+                return cls.from_io_control(fobj)
+        except OSError as e:
+            # [Errno 6]: No such device or address: '[STRING]' (occur when
+            # running from pycharm console in Linux)
+            if e.errno == 6:
+                log.yellow("WARNING: Silently ignoring OSError exception "
+                           "thrown at TerminalSize#from_tty_io_control")
+            else:
+                raise
 
     @staticmethod
     def from_tput_subprocess():
@@ -141,46 +199,6 @@ class TerminalSize(object):
 
 
 terminal_size = TerminalSize()
-
-
-@attr_item_call_auto_cache
-def fg(color):
-    """
-    Foreground color formatter function factory.
-
-    Each function casts from a unicode string to a colored bytestring
-    with the respective foreground color and foreground reset ANSI
-    escape codes. You can also use the ``fg.color`` or ``fg[color]``
-    directly as attributes/items.
-
-    The colors are the names of the ``colorama.Fore`` attributes
-    (case insensitive). For more information, see:
-
-    https://pypi.python.org/pypi/colorama
-
-    https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-    """
-    ansi_code = [getattr(colorama.Fore, color.upper()), colorama.Fore.RESET]
-    return lambda msg: msg.join(ansi_code)
-
-
-@attr_item_call_auto_cache
-def log(color):
-    """
-    Function factory for foreground-colored loggers (printers).
-
-    The ``log.color(msg)`` and ``print(fg.color(msg))`` are the
-    same. On Windows, the ANSI escape codes for colors are mapped to
-    ``SetConsoleTextAttribute`` Windows Console Handles API function
-    calls by the ``colorama`` package.
-
-    https://msdn.microsoft.com/library/windows/desktop/ms686047
-
-    The colorama initialization is on the ``dose.__main__`` module.
-    See ``fg`` for more information.
-    """
-    foreground = fg(color)
-    return lambda msg: print(foreground(msg))
 
 
 @attr_item_call_auto_cache
