@@ -48,7 +48,7 @@ LEDS_RED = (LED_RED, LED_OFF, LED_OFF)
 LEDS_YELLOW = (LED_OFF, LED_YELLOW, LED_OFF)
 LEDS_GREEN = (LED_OFF, LED_OFF, LED_GREEN)
 BACKGROUND_COLOR = 0x000000
-BACKGROUND_BORDER_COLOR = 0x7f7f7f7f
+BACKGROUND_BORDER_COLOR = 0x3f3f3f
 FILENAME_PATTERN_TO_IGNORE = "; ".join(["*.pyc",
                                         "*.pyo",
                                         ".git/*",
@@ -198,7 +198,6 @@ class DoseGraphicalSemaphore(wx.Frame):
                           min(self._paint_width, self._paint_height) * 3
                          ) / 3
     self._border = self._tile_size * .15
-    self._frame_pen_width = self._border / 3 # Half clipped (frame shape)
     self._pen_width = self._border / 4
     dist_circles = self._border / 5
     self._radius = (self._tile_size - 2 * self._pen_width - dist_circles) / 2
@@ -214,14 +213,16 @@ class DoseGraphicalSemaphore(wx.Frame):
                  self._paint_height / 2) # Center
 
     # Draw the background
+    gc.SetBrush(wx.Brush(int_to_color(BACKGROUND_BORDER_COLOR)))
+    gc.DrawRectangle(-self._paint_width / 2,
+                     -self._paint_height / 2,
+                     self._paint_width,
+                     self._paint_height)
     gc.SetBrush(wx.Brush(int_to_color(BACKGROUND_COLOR)))
-    gc.SetPen(wx.Pen(int_to_color(BACKGROUND_BORDER_COLOR),
-                     width=self._frame_pen_width)
-             )
-    gc.DrawRoundedRectangle(-self._paint_width / 2,
-                            -self._paint_height / 2,
-                            self._paint_width,
-                            self._paint_height,
+    gc.DrawRoundedRectangle(-self._paint_width / 2 + self._border / 6,
+                            -self._paint_height / 2 + self._border / 6,
+                            self._paint_width - self._border / 3,
+                            self._paint_height - self._border / 3,
                             self._border)
 
     # Draw the LEDs

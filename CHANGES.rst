@@ -8,6 +8,9 @@ repository.
 Development
 -----------
 
+* Rewrite the overall border drawing to minimize a light gray visual
+  glitch in the rounded borders.
+
 * Fix the egg long description to have a distinct path for GitHub
   links and GitHub images, based on the relative URLs of the project
   files. That's a reStructuredText generated from the Dose
