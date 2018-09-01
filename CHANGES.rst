@@ -8,6 +8,9 @@ repository.
 Development
 -----------
 
+* Require a newer watchdog_ version (``>=0.9.0``), deprecating the
+  patch regarding out-of-order inotify events.
+
 * Rewrite the overall border drawing to minimize a light gray visual
   glitch in the rounded borders.
 
