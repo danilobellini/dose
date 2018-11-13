@@ -1,5 +1,6 @@
 """Dose GUI for TDD: reStructuredText processing functions."""
 import itertools, functools, re
+from .compat import allow_implicit_stop
 from .misc import not_eq, tail
 
 # Be careful: this file is imported by setup.py!
@@ -47,6 +48,7 @@ def all_but_blocks(names, data, newline="\n", remove_empty_next=True,
     line generator if it's None. If desired, this function use
     ``commentless`` internally to remove the remaining comments.
     """
+    @allow_implicit_stop
     def remove_blocks(name, iterable):
         start, end = BLOCK_START % name, BLOCK_END % name
         it = iter(iterable)
@@ -68,6 +70,7 @@ def all_but_blocks(names, data, newline="\n", remove_empty_next=True,
     return gen if newline is None else newline.join(gen)
 
 
+@allow_implicit_stop
 def commentless(data):
     """
     Generator that removes from a list of strings the double dot

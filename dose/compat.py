@@ -1,5 +1,5 @@
 """Dose GUI for TDD: compatibility utilities."""
-import sys, functools, importlib
+import functools, importlib, sys, warnings
 from .misc import LazyAccess, kw_map
 
 __all__ = ["wx", "quote", "PY2", "UNICODE"]
@@ -157,3 +157,27 @@ if PY2:
     UNICODE = unicode # NOQA
 else:
     UNICODE = str
+
+
+def allow_implicit_stop(gen_func):
+    """
+    Fix the backwards-incompatible PEP-0479 gotcha/bug
+    https://www.python.org/dev/peps/pep-0479
+    """
+    @functools.wraps(gen_func)
+    def wrapper(*args, **kwargs):
+        with warnings.catch_warnings():
+            for cls in [DeprecationWarning, PendingDeprecationWarning]:
+                warnings.filterwarnings(
+                    action="ignore",
+                    message=".* raised StopIteration",
+                    category=cls,
+                )
+            try:
+                for item in gen_func(*args, **kwargs):
+                    yield item
+            except RuntimeError as exc:
+                if type(exc.__cause__) is StopIteration:
+                    return
+                raise
+    return wrapper

@@ -8,6 +8,9 @@ repository.
 Development
 -----------
 
+* Create ``dose.compat.allow_implicit_stop`` decorator to let Dose work
+  in Python 3.7, removing the warnings in older Python versions.
+
 * Require a newer watchdog_ version (``>=0.9.0``), deprecating the
   patch regarding out-of-order inotify events.
 
