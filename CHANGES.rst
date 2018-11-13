@@ -8,6 +8,9 @@ repository.
 Development
 -----------
 
+* Update the McCabe complexity limit to 9 in flake8_ to let it pass
+  in all tests (7 was too small).
+
 * Use ``collections.abc`` for testing when available, to avoid
   misleading warnings regarding the still unreleased Python 3.8.
 
