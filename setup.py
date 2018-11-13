@@ -35,7 +35,8 @@ metadata = {
   "packages": setuptools.find_packages(),
   "install_requires": ["watchdog>=0.9.0",
                        "colorama>=0.3.7",
-                       "docutils>=0.12"], # Needs wxPython as well
+                       "docutils>=0.12",
+                       "wxPython"],
   "entry_points": {"console_scripts": ["dose = dose.__main__:main"]},
   "data_files": [("share/dose/v" + dose.__version__, SHARED_FILES)],
 }

@@ -152,25 +152,25 @@ Dose has few requirements:
 
 - Linux, OS X, Windows or Cygwin (Windows)
 - Python (2 or 3) with pip/wheel/setuptools
-- wxPython 2.8 or 3.0 (either Classic or Phoenix)
 - PyPI packages (auto-installed):
 
   - watchdog
   - docutils
   - colorama
+  - wxPython 2.8, 3.0 (either Classic or Phoenix) or 4+ (Phoenix)
 
-The only dependency package you have to worry about is wxPython, the
-other ones should be installed together with Dose when they're not
-available.
+All the packages are installed with `pip`, including wxPython,
+but this last one you might need/want to install by using a build
+packaged in your operating system repository, so the following
+documentation, once created for older versions of wxPython (before its
+4.0 release), was kept here as part of the documentation.
 
 On Python 3, wxPython Phoenix is required (since wxPython Classic
 requires Python 2, modus tollens). Even on Python 2, Phoenix is
 usually easier to install, as it can be installed directly via pip
 no matter the platform or Python version::
 
-  pip install --upgrade --trusted-host wxpython.org --pre \
-              -f http://wxpython.org/Phoenix/snapshot-builds/ \
-              wxPython_Phoenix
+  pip install wxPython
 
 The wxPyWiki have a detailed page on `how to install wxPython`_\ ,
 whence that Phoenix install command came. The link includes some
@@ -226,7 +226,7 @@ If you wish to install Dose in a Python virtualenv instead of a system
 installation, you should either:
 
 - Install wxPython Phoenix via pip (recommended);
-- Create a Python 2 virtualenv with the ``--system-site-packages``
+- Create a virtualenv with the ``--system-site-packages``
   option in a system that already has some wxPython version
   installed.
 
