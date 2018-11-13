@@ -10,6 +10,8 @@ Development
 
 * Add wxPython as a dependency, so a ``pip install dose`` should be
   the whole installation procedure in a virtualenv.
+  The documentation was updated to the new installation procedure
+  and it now includes a link to its AUR package (Arch Linux).
 
 * Update the McCabe complexity limit to 9 in flake8_ to let it pass
   in all tests (7 was too small).

@@ -263,6 +263,8 @@ installed with::
 Requirements on Arch Linux
 --------------------------
 
+For a simple installation, it's available in AUR_\ .
+
 This distro doesn't include a ``/usr/bin/pip`` script, so you should
 use ``python2 -m pip`` (Python 2) or ``python -m pip`` (Python 3)
 instead of just ``pip``\ . By the way, in this Linux distribution
@@ -273,17 +275,14 @@ you're in a virtualenv. The commands below should be called with
 When installing pip, you don't need to worry if the Python interpreter
 itself is installed in your system, as the package manager would
 install python for you as a dependency if it's not installed. To
-install pip on Python 3::
+install pip and wxPython Phoenix 4 on Python 3::
 
-  pacman -Sy python-pip
+  pacman -Sy python-pip python-wxpython
 
 The wxPython Phoenix snapshot can be installed via pip. On the other
 hand, to install pip and wxPython Classic 3.0 on Python 2::
 
-  pacman -Sy python2-pip wxpython
-
-You can replace ``wxpython`` by ``wxpython2.8``\ , that would install
-wxPython Classic 2.8 instead of 3.0.
+  pacman -Sy python2-pip python2-wxpython3
 
 If you wish to install Dose in a virtualenv, you should install the
 ``python-virtualenv`` (Python 3) or the ``python2-virtualenv``
@@ -536,6 +535,7 @@ Please see the `CHANGES.rst`_ file for more information.
   https://wiki.wxpython.org/How%20to%20install%20wxPython
 
 .. _PyPI: http://pypi.python.org/pypi/dose
+.. _AUR: https://aur.archlinux.org/packages/dose
 .. _Homebrew: http://brew.sh
 .. _`Python official site`: https://www.python.org
 .. _`wxPython official site`: https://www.wxpython.org
