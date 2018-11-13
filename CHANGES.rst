@@ -8,6 +8,9 @@ repository.
 Development
 -----------
 
+* Use ``collections.abc`` for testing when available, to avoid
+  misleading warnings regarding the still unreleased Python 3.8.
+
 * Create ``dose.compat.allow_implicit_stop`` decorator to let Dose work
   in Python 3.7, removing the warnings in older Python versions.
 

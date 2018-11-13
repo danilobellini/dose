@@ -1,5 +1,12 @@
 """Dose GUI for TDD: test module for the reStructuredText stuff."""
-import pytest, collections, itertools
+try:
+    from collections.abc import Iterator
+except ImportError:
+    from collections import Iterator
+import itertools
+
+import pytest
+
 from dose.rest import (indent_size, get_block, all_but_blocks, commentless,
                        single_line, single_line_block, abs_urls)
 
@@ -49,7 +56,7 @@ class TestGetBlock(ATestBlock):
 
     def test_simple_named_block_generator(self):
         blk = get_block("blah", self.data, newline=None)
-        assert isinstance(blk, collections.Iterator)
+        assert isinstance(blk, Iterator)
         assert list(blk) == ["", "some text", ""]
 
     def test_block_not_found(self):
@@ -57,7 +64,7 @@ class TestGetBlock(ATestBlock):
 
     def test_block_not_found_generator(self):
         blk = get_block("something_not_used", self.data, newline=None)
-        assert isinstance(blk, collections.Iterator)
+        assert isinstance(blk, Iterator)
         assert list(blk) == []
 
     def test_twice_gets_only_first(self):
@@ -65,7 +72,7 @@ class TestGetBlock(ATestBlock):
 
     def test_twice_gets_only_first_generator(self):
         blk = get_block("blah", self.double_data, newline=None)
-        assert isinstance(blk, collections.Iterator)
+        assert isinstance(blk, Iterator)
         assert list(blk) == ["", "another text", ""]
 
 
@@ -119,7 +126,7 @@ class TestAllButBlocks(ATestBlock):
 
     def test_generator_when_newline_is_none_and_data_is_endless(self):
         result = all_but_blocks("some name", self.endless_data, newline=None)
-        assert isinstance(result, collections.Iterator)
+        assert isinstance(result, Iterator)
         for unused in range(30):
             line = next(result)
             assert line == "again"
@@ -153,7 +160,7 @@ class TestCommentless(ATestBlock):
           " ending",
           "continuation",
         ] * 3)
-        assert isinstance(result, collections.Iterator)
+        assert isinstance(result, Iterator)
         assert list(result) == ["continuation"] * 3
 
     def test_links_arent_comments(self):
@@ -171,7 +178,7 @@ class TestCommentless(ATestBlock):
         ]
         expected_once = data[:-4] + data[-2:]
         result = commentless(data * 2)
-        assert isinstance(result, collections.Iterator)
+        assert isinstance(result, Iterator)
         assert list(result) == expected_once * 2
 
 
