@@ -72,11 +72,11 @@ class Doctree2HtmlForWx(docutils.nodes.GenericNodeVisitor):
     def default_visit(self, node):
         if node.tagname == "#text":
             self.body.append(self.html_escape(node.astext()))
-        elif node.tagname not in ["document", "comment", "target"]:
+        elif node.tagname in self.tags_visit:
             self.body.append(self.tags_visit[node.tagname])
 
     def default_departure(self, node):
-        if node.tagname not in ["#text", "transition", "comment", "target"]:
+        if node.tagname in self.tags_depart:
             self.body.append(self.tags_depart[node.tagname])
 
     def visit_reference(self, node):

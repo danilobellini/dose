@@ -13,6 +13,8 @@ Development
 * Don't assume that the exception has a ``__cause__``
   in ``dose.compat.allow_implicit_stop``.
 
+* Make the help screen compatible with newer ``docutils``.
+
 
 v1.2.1
 ------
