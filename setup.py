@@ -1,26 +1,30 @@
 #!/usr/bin/env python
 """Dose GUI for TDD: setup script."""
-import os, setuptools, dose, dose.rest, dose.misc, distutils.filelist
+import distutils.filelist
+import os
+import setuptools
+
+import dose, dose.rest, dose.shared
+
 
 SDIST_PATH = os.path.dirname(__file__) # That's also sys.path[0]
 if SDIST_PATH:           # The setuptools.setup function requires this to
     os.chdir(SDIST_PATH) # work properly when called from otherwhere
 
 
-def parse_manifest(template_lines):
+def parse_manifest():
     """List of file names included by the MANIFEST.in template lines."""
     manifest_files = distutils.filelist.FileList()
-    for line in template_lines:
+    for line in dose.shared.get_shared("MANIFEST.in").splitlines():
         if line.strip():
             manifest_files.process_template_line(line)
     return manifest_files.files
 
 
-README = dose.rest.abs_urls(dose.misc.read_plain_text("README.rst"),
+README = dose.rest.abs_urls(dose.shared.README,
                             image_url = "/".join([dose.__url__, "raw",
                                                   dose.__version__]),
                             target_url = dose.__url__)
-SHARED_FILES = parse_manifest(dose.misc.read_plain_text("MANIFEST.in"))
 
 
 metadata = {
@@ -38,7 +42,7 @@ metadata = {
                        "docutils>=0.12",
                        "wxPython"],
   "entry_points": {"console_scripts": ["dose = dose.__main__:main"]},
-  "data_files": [("share/dose/v" + dose.__version__, SHARED_FILES)],
+  "data_files": [("share/dose/v" + dose.__version__, parse_manifest())],
 }
 
 metadata["classifiers"] = """

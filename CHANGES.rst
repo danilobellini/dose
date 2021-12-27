@@ -15,6 +15,9 @@ Development
 
 * Make the help screen compatible with newer ``docutils``.
 
+* Add a last resort strategy for accessing the shared resources
+  on ``setup.py`` from the development directory.
+
 
 v1.2.1
 ------

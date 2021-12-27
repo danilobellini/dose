@@ -76,6 +76,10 @@ class TestGetShared(object):
         # Ensure the setuptools "pkg_resources.resource_string" is used
         assert flag.was_called
 
+    def test_last_resort_get_source(self):
+        dunder_init = get_shared("dose/__init__.py")
+        assert '__version__ = "%s"' % __version__ in dunder_init
+
 
 def test_first_contributor_is_author():
     assert isinstance(CONTRIBUTORS, list)
