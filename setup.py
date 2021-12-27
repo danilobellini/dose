@@ -3,6 +3,7 @@
 import distutils.filelist
 import os
 import setuptools
+import sys
 
 import dose, dose.rest, dose.shared
 
@@ -26,6 +27,23 @@ README = dose.rest.abs_urls(dose.shared.README,
                                                   dose.__version__]),
                             target_url = dose.__url__)
 
+dose_install_reqs = ["docutils>=0.12", "wxPython"]
+watchdog_req = "watchdog>=0.9"
+colorama_req = "colorama>=0.3.7"
+if sys.version_info[:2] == (3, 3):
+    watchdog_req += ",<0.10"
+    colorama_req += ",<0.4"
+    dose_install_reqs.append("pyyaml<4")  # Indirect, for watchdog
+    dose_install_reqs.append("numpy<1.12")  # Indirect, for wxPython
+else:
+    if sys.version_info[0] == 2:
+        dose_install_reqs.append("pyyaml<6")  # Indirect, for watchdog
+    elif sys.version_info[:2] == (3, 4):
+        dose_install_reqs.append("pyyaml<5.3")  # Indirect, for watchdog
+        colorama_req += ",<0.4.2"
+    if sys.version_info < (3, 6):
+        watchdog_req += ",<1"
+dose_install_reqs.extend([watchdog_req, colorama_req])
 
 metadata = {
   "name": "dose",
@@ -37,10 +55,7 @@ metadata = {
   "long_description": dose.rest.all_but_blocks("summary", README),
   "license": "GPLv3",
   "packages": setuptools.find_packages(),
-  "install_requires": ["watchdog>=0.9.0",
-                       "colorama>=0.3.7",
-                       "docutils>=0.12",
-                       "wxPython"],
+  "install_requires": dose_install_reqs,
   "entry_points": {"console_scripts": ["dose = dose.__main__:main"]},
   "data_files": [("share/dose/v" + dose.__version__, parse_manifest())],
 }
