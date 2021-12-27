@@ -8,6 +8,12 @@ repository.
 Development
 -----------
 
+* Fix pen width type cast to ``int``, as required by newer wxPython.
+
+
+v1.2.1
+------
+
 * Add wxPython as a dependency, so a ``pip install dose`` should be
   the whole installation procedure in a virtualenv.
   The documentation was updated to the new installation procedure

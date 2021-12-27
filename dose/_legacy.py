@@ -234,7 +234,7 @@ class DoseGraphicalSemaphore(wx.Frame):
     for led in self.leds: # The led is an integer with the color
       gc.SetBrush(wx.Brush(int_to_color(led)))
       gc.SetPen(wx.Pen(int_to_darkened_color(led),
-                       width=self._pen_width)
+                       width=int(self._pen_width))
                )
       gc.DrawEllipse(-self._radius,
                      -self._radius,
