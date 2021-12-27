@@ -10,6 +10,9 @@ Development
 
 * Fix pen width type cast to ``int``, as required by newer wxPython.
 
+* Don't assume that the exception has a ``__cause__``
+  in ``dose.compat.allow_implicit_stop``.
+
 
 v1.2.1
 ------

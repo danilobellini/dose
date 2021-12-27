@@ -177,7 +177,7 @@ def allow_implicit_stop(gen_func):
                 for item in gen_func(*args, **kwargs):
                     yield item
             except RuntimeError as exc:
-                if type(exc.__cause__) is StopIteration:
+                if type(getattr(exc, "__cause__", None)) is StopIteration:
                     return
                 raise
     return wrapper
