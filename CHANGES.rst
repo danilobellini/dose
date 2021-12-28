@@ -8,6 +8,10 @@ repository.
 Development
 -----------
 
+* Configure tests and redefine dependencies in order to let Dose run
+  on Python 2.7 and 3.3 onwards (up to 3.10),
+  updating the classifiers to contain this compatibility information.
+
 * Fix pen width type cast to ``int``, as required by newer wxPython.
 
 * Don't assume that the exception has a ``__cause__``
