@@ -1,24 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Dose - Automated semaphore GUI showing the state in test driven development
-Copyright (C) 2012 Danilo de Jesus da Silva Bellini
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 3 of the License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-Created on Sat Sep 29 2012
-danilo [dot] bellini [at] gmail [dot] com
-"""
-
+"""Dose - Legacy module with GUI, config file and watcher specifics."""
 from __future__ import division, print_function, unicode_literals
 import sys, os, json, threading
 from datetime import datetime
