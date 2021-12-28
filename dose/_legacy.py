@@ -462,7 +462,8 @@ class DoseWatcher(object):
     assert not self.watching
 
     def selector(evt):
-      if evt.is_directory:
+      if (evt.is_directory or
+          evt.event_type not in ["created", "deleted", "modified"]):
         return False
       path = evt.path
       if path in self._last_fnames: # Detected a "killing cycle"

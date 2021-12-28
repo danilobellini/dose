@@ -12,6 +12,9 @@ Development
   on Python 2.7 and 3.3 onwards (up to 3.10),
   updating the classifiers to contain this compatibility information.
 
+* Run the job only on creation/modification/deletion events,
+  not on other filesystem events such as "file closed".
+
 * Fix pen width type cast to ``int``, as required by newer wxPython.
 
 * Don't assume that the exception has a ``__cause__``
