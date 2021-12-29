@@ -22,10 +22,11 @@ def parse_manifest():
     return manifest_files.files
 
 
-README = dose.rest.abs_urls(dose.shared.README,
-                            image_url = "/".join([dose.__url__, "raw",
-                                                  dose.__version__]),
-                            target_url = dose.__url__)
+README = dose.rest.abs_urls(
+    dose.shared.README,
+    image_url="/".join([dose.__url__, "raw", "v" + dose.__version__]),
+    target_url=dose.__url__,
+)
 
 dose_install_reqs = ["docutils>=0.12", "wxPython"]
 watchdog_req = "watchdog>=0.9"
