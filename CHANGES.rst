@@ -5,8 +5,8 @@ The section titles in this change log are the tag names in the git
 repository.
 
 
-Development
------------
+v1.2.2
+------
 
 * Configure tests and redefine dependencies in order to let Dose run
   on Python 2.7 and 3.3 onwards (up to 3.10),
