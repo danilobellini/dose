@@ -17,41 +17,37 @@ def get_shared(fname, encoding="utf-8"):
     https://github.com/pypa/setuptools/issues/130
     """
     relative_path = "share/dose/v{0}/{1}".format(__version__, fname)
-    prefixed_path = os.path.join(sys.prefix, *relative_path.split("/"))
+    paths = []
+
+    # Look for the shared file based on current __file__,
+    # this approach should work when importing this from setup.py,
+    # but one should not rely on it elsewhere
+    paths.append(os.path.join(os.path.dirname(__file__), "..", fname))
 
     # Look for the file directly on sys.prefix
-    try:
-        return "\n".join(read_plain_text(prefixed_path, encoding=encoding))
-    except IOError:
-        pass
+    paths.append(os.path.join(sys.prefix, *relative_path.split("/")))
 
     # Homebrew (Mac OS X) stores the data in Cellar, a directory in
     # the system prefix. Calling "brew --prefix" returns that prefix,
     # and pip installs the shared resources there
     cellar_index = sys.prefix.find("/Cellar/")
     if cellar_index != -1: # Found!
-        outside_cellar_path = os.path.join(sys.prefix[:cellar_index],
-                                           *relative_path.split("/"))
+        paths.append(os.path.join(
+            sys.prefix[:cellar_index],
+            *relative_path.split("/")
+        ))
+
+    # Try to load directly from one of the selected file paths
+    for path in paths:
         try:
-            return "\n".join(read_plain_text(outside_cellar_path,
-                                             encoding=encoding))
+            return "\n".join(read_plain_text(path, encoding=encoding))
         except IOError:
             pass
 
     # Fallback: look for the file using setuptools (perhaps it's still
     # compressed inside an egg file or stored otherwhere)
     from pkg_resources import Requirement, resource_string
-    try:
-        return resource_string(Requirement.parse("dose"), relative_path)
-    except IOError:
-        pass
-
-    # Last resort: look for the shared file based on current __file__,
-    # this approach should work when importing this from setup.py,
-    # but one should not rely on it elsewhere
-    resource_path = os.path.join(os.path.dirname(__file__), "..", fname)
-    return "\n".join(read_plain_text(resource_path,
-                                     encoding=encoding))
+    return resource_string(Requirement.parse("dose"), relative_path)
 
 
 README = get_shared("README.rst").splitlines()

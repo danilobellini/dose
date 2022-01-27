@@ -5,6 +5,12 @@ The section titles in this change log are the tag names in the git
 repository.
 
 
+Development
+------------
+
+* Fix ``setup.py`` for instalation from source.
+
+
 v1.2.2
 ------
 
