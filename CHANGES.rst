@@ -10,6 +10,8 @@ Development
 
 * Fix ``setup.py`` for instalation from source.
 
+* Add positional arguments to pytest called from tox.
+
 
 v1.2.2
 ------
