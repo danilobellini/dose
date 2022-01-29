@@ -1,6 +1,6 @@
 """Dose GUI for TDD: shared resources."""
 import sys, os
-from . import __version__
+from . import _from_setup, __version__
 from .misc import read_plain_text
 
 
@@ -22,7 +22,9 @@ def get_shared(fname, encoding="utf-8"):
     # Look for the shared file based on current __file__,
     # this approach should work when importing this from setup.py,
     # but one should not rely on it elsewhere
-    paths.append(os.path.join(os.path.dirname(__file__), "..", fname))
+    resource_path = os.path.join(os.path.dirname(__file__), "..", fname)
+    if _from_setup:
+        paths.append(resource_path)
 
     # Look for the file directly on sys.prefix
     paths.append(os.path.join(sys.prefix, *relative_path.split("/")))
@@ -46,8 +48,15 @@ def get_shared(fname, encoding="utf-8"):
 
     # Fallback: look for the file using setuptools (perhaps it's still
     # compressed inside an egg file or stored otherwhere)
-    from pkg_resources import Requirement, resource_string
-    return resource_string(Requirement.parse("dose"), relative_path)
+    from pkg_resources import (
+        DistributionNotFound, Requirement, resource_string
+    )
+    try:
+        return resource_string(Requirement.parse("dose"), relative_path)
+    except (IOError, DistributionNotFound):
+        if not _from_setup:  # Last resort when outside of setup.py
+            return "\n".join(read_plain_text(resource_path, encoding=encoding))
+        raise
 
 
 README = get_shared("README.rst").splitlines()

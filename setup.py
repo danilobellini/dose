@@ -5,7 +5,10 @@ import os
 import setuptools
 import sys
 
-import dose, dose.rest, dose.shared
+import dose
+dose._from_setup = True
+import dose.rest
+import dose.shared
 
 
 SDIST_PATH = os.path.dirname(__file__) # That's also sys.path[0]
