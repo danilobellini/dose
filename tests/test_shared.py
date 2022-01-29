@@ -1,7 +1,20 @@
 """Dose GUI for TDD: test module for the shared resources module."""
+from shutil import copytree, rmtree
+from subprocess import Popen
 import pkg_resources, pytest, sys, io
+import setuptools
+
+import dose
 from dose import __version__, __author__
 from dose.shared import get_shared, README, CHANGES, CONTRIBUTORS, LICENSE
+
+
+# Workaround for old pytest (should only happen in Python 3.3 nowadays)
+if pytest.__version__ < "3.9":
+    from pathlib import Path
+    @pytest.yield_fixture
+    def tmp_path(tmpdir):
+        yield Path(str(tmpdir))
 
 
 class RaiserCall(Exception):
@@ -79,6 +92,39 @@ class TestGetShared(object):
     def test_last_resort_get_source(self):
         dunder_init = get_shared("dose/__init__.py")
         assert '__version__ = "%s"' % __version__ in dunder_init
+
+    def test_setup_py_wont_use_installed_readme(self, tmp_path):
+        Path = type(tmp_path)
+        dose_path = tmp_path / "rewritten-readme"
+        copytree(str(Path(dose.__file__).parent.parent), str(dose_path))
+
+        readme_filename = str(dose_path / "README.rst")
+        with io.open(readme_filename, "w", encoding="utf-8") as readme:
+            readme.write("\n".join([
+                u"A title",
+                u".. summary",
+                u"A fake egg for testing Dose!",
+                u".. summary end",
+                u"An extra line just to TEST it!",
+            ]))
+
+        command = ["python", "setup.py", "egg_info"]
+        Popen(command, cwd=str(dose_path)).communicate()
+        pkg_info_filename = str(dose_path / "dose.egg-info" / "PKG-INFO")
+        with io.open(pkg_info_filename, encoding="utf-8") as pkg_info:
+            pkg_info_data = pkg_info.read()
+        rmtree(str(dose_path))
+
+        assert u"Summary: A fake egg for testing Dose!" in pkg_info_data
+        if setuptools.__version__ >= "57":
+            assert pkg_info_data.rstrip().endswith(
+                u"A title\nAn extra line just to TEST it!"
+            )
+        else:
+            assert (
+                u"Description: A title\n        An extra line just to TEST it!"
+                in pkg_info_data
+            )
 
 
 def test_first_contributor_is_author():
